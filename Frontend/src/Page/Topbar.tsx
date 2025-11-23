@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -9,6 +9,9 @@ import {
   MenuItem,
   useMediaQuery,
   useTheme,
+  Snackbar,
+  Alert,
+  CircularProgress,
 } from "@mui/material";
 import { Phone, Email } from "@mui/icons-material";
 
@@ -20,11 +23,24 @@ const inquiryTypes = [
   { value: "Request Product", label: "Request Product" },
 ];
 
+const Montserrat = '"Montserrat", sans-serif';
+
 const Topbar: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error";
+  }>({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
   const [formData, setFormData] = useState({
     name: "",
     mobile: "",
@@ -37,12 +53,37 @@ const Topbar: React.FC = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // allow other components to open this modal via a custom window event
+  useEffect(() => {
+    const onOpenInquiry = () => {
+      handleOpen();
+    };
+    window.addEventListener("openInquiry", onOpenInquiry);
+    return () => {
+      window.removeEventListener("openInquiry", onOpenInquiry);
+    };
+    // intentionally no dependencies so it registers once
+  }, []);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const sendWhatsApp = () => {
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      mobile: "",
+      type: "",
+      description: "",
+      orderNumber: "",
+      orderDate: "",
+    });
+  };
+
+  const openWhatsApp = () => {
     const message = `
 *New Inquiry Received*
 
@@ -55,24 +96,91 @@ const Topbar: React.FC = () => {
 *Description:* 
 ${formData.description || "N/A"}
 
-* Fill out the form and click "Send to WhatsApp". To include images, attach them manually in WhatsApp after the message opens.*
-
 _Sent via MrFresh.lk Inquiry Form_
     `;
     const phoneNumber = "94767080553";
-    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
+      message
+    )}`;
     window.open(url, "_blank");
-
-    setFormData({
-      name: "",
-      mobile: "",
-      type: "",
-      description: "",
-      orderNumber: "",
-      orderDate: "",
-    });
-    handleClose();
   };
+
+  const handleSaveAndShare = async () => {
+    if (!formData.name || !formData.mobile || !formData.type) {
+      setSnackbar({
+        open: true,
+        message: "Please fill Name, Mobile and Inquiry Type.",
+        severity: "error",
+      });
+      return;
+    }
+
+    const API_HOST = import.meta.env.VITE_API_HOST as string | undefined;
+    if (!API_HOST) {
+      setSnackbar({
+        open: true,
+        message: "API host not configured (VITE_API_HOST).",
+        severity: "error",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    const payload = {
+      name: formData.name,
+      mobile: formData.mobile,
+      inquirytype: formData.type,
+      ordernumber: formData.orderNumber,
+      orderdate: formData.orderDate,
+      description: formData.description,
+    };
+
+    try {
+      const resp = await fetch(`${API_HOST}/inquiry`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => null);
+        throw new Error(err?.message || `Server responded with ${resp.status}`);
+      }
+
+      await resp.json();
+
+      setSnackbar({
+        open: true,
+        message: "Inquiry saved successfully. Opening WhatsApp...",
+        severity: "success",
+      });
+
+      setTimeout(() => {
+        openWhatsApp();
+        resetForm();
+        handleClose();
+      }, 300);
+    } catch (error: any) {
+      setSnackbar({
+        open: true,
+        message: error?.message || "Failed to save inquiry.",
+        severity: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSnackbarClose = () =>
+    setSnackbar((s) => ({ ...s, open: false }));
+
+  // Shared props to ensure font family everywhere in TextField
+  const textFieldCommon = {
+    InputLabelProps: { sx: { fontFamily: Montserrat } },
+    InputProps: { sx: { fontFamily: Montserrat } },
+    sx: { mb: 2 },
+  } as const;
 
   return (
     <>
@@ -86,9 +194,7 @@ _Sent via MrFresh.lk Inquiry Form_
           left: 0,
           zIndex: 1200,
           bgcolor: "#222",
-          boxShadow: "0px 2px 6px rgba(0,0,0,0.3)",
           display: "flex",
-          fontFamily: '"Montserrat", sans-serif',
         }}
       >
         {/* LEFT COLUMN */}
@@ -100,10 +206,6 @@ _Sent via MrFresh.lk Inquiry Form_
             px: { xs: 1, sm: 2, md: 4 },
             color: "#fff",
             gap: { xs: 0.5, sm: 1.5, md: 3 },
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            fontFamily: '"Montserrat", sans-serif',
           }}
         >
           <Typography
@@ -111,8 +213,7 @@ _Sent via MrFresh.lk Inquiry Form_
             sx={{
               fontWeight: 600,
               color: "#c2d142",
-              fontSize: { xs: "0.60rem", sm: "0.75rem", md: "0.9rem" },
-              fontFamily: '"Montserrat", sans-serif',
+              fontFamily: Montserrat,
             }}
           >
             Need Assistance? Contact Us:
@@ -124,8 +225,7 @@ _Sent via MrFresh.lk Inquiry Form_
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  fontSize: "0.8rem",
-                  fontFamily: '"Montserrat", sans-serif',
+                  fontFamily: Montserrat,
                 }}
               >
                 <Phone sx={{ mr: 1 }} />
@@ -133,7 +233,7 @@ _Sent via MrFresh.lk Inquiry Form_
                   href="tel:+94767080553"
                   underline="none"
                   color="inherit"
-                  sx={{ fontFamily: '"Montserrat", sans-serif' }}
+                  sx={{ fontFamily: Montserrat }}
                 >
                   (+94) 76 708 0553
                 </Link>
@@ -143,8 +243,7 @@ _Sent via MrFresh.lk Inquiry Form_
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  fontSize: "0.8rem",
-                  fontFamily: '"Montserrat", sans-serif',
+                  fontFamily: Montserrat,
                 }}
               >
                 <Email sx={{ mr: 1 }} />
@@ -152,7 +251,7 @@ _Sent via MrFresh.lk Inquiry Form_
                   href="mailto:info@fresh.lk"
                   underline="none"
                   color="inherit"
-                  sx={{ fontFamily: '"Montserrat", sans-serif' }}
+                  sx={{ fontFamily: Montserrat }}
                 >
                   info@fresh.lk
                 </Link>
@@ -169,7 +268,6 @@ _Sent via MrFresh.lk Inquiry Form_
             alignItems: "center",
             justifyContent: "flex-end",
             px: { xs: 1, sm: 2, md: 4 },
-            fontFamily: '"Montserrat", sans-serif',
           }}
         >
           <Button
@@ -182,8 +280,7 @@ _Sent via MrFresh.lk Inquiry Form_
               fontWeight: 600,
               borderRadius: "50px",
               fontSize: "0.75rem",
-              whiteSpace: "nowrap",
-              fontFamily: '"Montserrat", sans-serif',
+              fontFamily: Montserrat,
             }}
           >
             Inquire Here
@@ -199,20 +296,16 @@ _Sent via MrFresh.lk Inquiry Form_
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: { xs: "80%", sm: 450 },
+            width: { xs: "90%", sm: 450 },
             bgcolor: "#fff",
             borderRadius: 2,
-            p: 3,
+            p: 1,
             boxShadow: 24,
-            fontFamily: '"Montserrat", sans-serif',
+            // ensure modal content uses Montserrat
+            fontFamily: Montserrat,
           }}
         >
-          <Typography
-            variant="h6"
-            fontWeight={700}
-            mb={2}
-            sx={{ fontFamily: '"Montserrat", sans-serif' }}
-          >
+          <Typography variant="h6" fontWeight={700} mb={2} sx={{ fontFamily: Montserrat }}>
             Inquiry Form
           </Typography>
 
@@ -222,9 +315,7 @@ _Sent via MrFresh.lk Inquiry Form_
             name="name"
             value={formData.name}
             onChange={handleChange}
-            sx={{ mb: 2 }}
-            InputLabelProps={{ sx: { fontFamily: '"Montserrat", sans-serif' } }}
-            InputProps={{ sx: { fontFamily: '"Montserrat", sans-serif' } }}
+            {...textFieldCommon}
           />
 
           <TextField
@@ -233,9 +324,7 @@ _Sent via MrFresh.lk Inquiry Form_
             name="mobile"
             value={formData.mobile}
             onChange={handleChange}
-            sx={{ mb: 2 }}
-            InputLabelProps={{ sx: { fontFamily: '"Montserrat", sans-serif' } }}
-            InputProps={{ sx: { fontFamily: '"Montserrat", sans-serif' } }}
+            {...textFieldCommon}
           />
 
           <TextField
@@ -245,16 +334,11 @@ _Sent via MrFresh.lk Inquiry Form_
             name="type"
             value={formData.type}
             onChange={handleChange}
-            sx={{ mb: 2 }}
-            InputLabelProps={{ sx: { fontFamily: '"Montserrat", sans-serif' } }}
-            InputProps={{ sx: { fontFamily: '"Montserrat", sans-serif' } }}
+            {...textFieldCommon}
+            SelectProps={{ MenuProps: { PaperProps: { sx: { fontFamily: Montserrat } } } }}
           >
             {inquiryTypes.map((option) => (
-              <MenuItem
-                key={option.value}
-                value={option.value}
-                sx={{ fontFamily: '"Montserrat", sans-serif' }}
-              >
+              <MenuItem key={option.value} value={option.value} sx={{ fontFamily: Montserrat }}>
                 {option.label}
               </MenuItem>
             ))}
@@ -266,9 +350,7 @@ _Sent via MrFresh.lk Inquiry Form_
             name="orderNumber"
             value={formData.orderNumber}
             onChange={handleChange}
-            sx={{ mb: 2 }}
-            InputLabelProps={{ sx: { fontFamily: '"Montserrat", sans-serif' } }}
-            InputProps={{ sx: { fontFamily: '"Montserrat", sans-serif' } }}
+            {...textFieldCommon}
           />
 
           <TextField
@@ -278,9 +360,9 @@ _Sent via MrFresh.lk Inquiry Form_
             type="date"
             value={formData.orderDate}
             onChange={handleChange}
+            InputLabelProps={{ shrink: true, sx: { fontFamily: Montserrat } }}
+            InputProps={{ sx: { fontFamily: Montserrat } }}
             sx={{ mb: 2 }}
-            InputLabelProps={{ shrink: true, sx: { fontFamily: '"Montserrat", sans-serif' } }}
-            InputProps={{ sx: { fontFamily: '"Montserrat", sans-serif' } }}
           />
 
           <TextField
@@ -291,25 +373,37 @@ _Sent via MrFresh.lk Inquiry Form_
             rows={3}
             value={formData.description}
             onChange={handleChange}
+            InputLabelProps={{ sx: { fontFamily: Montserrat } }}
+            InputProps={{ sx: { fontFamily: Montserrat } }}
             sx={{ mb: 2 }}
-            InputLabelProps={{ sx: { fontFamily: '"Montserrat", sans-serif' } }}
-            InputProps={{ sx: { fontFamily: '"Montserrat", sans-serif' } }}
           />
 
           <Button
             variant="contained"
             fullWidth
-            onClick={sendWhatsApp}
+            onClick={handleSaveAndShare}
+            disabled={loading}
             sx={{
               bgcolor: "#c2d142",
               color: "#000",
-              fontFamily: '"Montserrat", sans-serif',
+              textTransform: "none",
+              fontFamily: Montserrat,
             }}
           >
-            Send to WhatsApp
+            {loading ? <CircularProgress size={20} /> : "Save & Send to WhatsApp"}
           </Button>
         </Box>
       </Modal>
+
+      <Snackbar open={snackbar.open} autoHideDuration={5000} onClose={handleSnackbarClose}>
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          sx={{ width: "100%", fontFamily: Montserrat }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 };

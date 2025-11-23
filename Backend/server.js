@@ -3,12 +3,8 @@ import express from "express";
 import connectDB from "./lib/db.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import path from "path";
-import { fileURLToPath } from "url";
+import inquirysection from "./routes/inquiry.route.js";
 
-// Create __dirname in ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Create an instance of Express
 const app = express();
@@ -38,10 +34,9 @@ app.get("/", (req, res) => {
   res.send("Server is running");
 });
 
-// Example API route
-app.get("/api/test", (req, res) => {
-  res.json({ message: "API working fine" });
-});
+//ADMIN -> MIDDLEWARE -> SERVER
+app.use('/',inquirysection);
+
 
 // Start server
 const port = 8000;

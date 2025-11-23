@@ -83,11 +83,15 @@ export default function EtsyStyleHeader() {
   const bgColor = isDarkMode ? "#0f172a" : "#ffffff";
   const iconColor = isDarkMode ? "#cbd5e1" : "#555";
 
-  // Updated handler to open drawer when clicking "Categories"
+  // Updated handler to open drawer when clicking "Categories" and dispatch event for "chat"
   const handleBottomNavClick = (value: string) => {
     setBottomNavValue(value);
     if (value === "categories") {
       setDrawerOpen(true);
+    }
+    if (value === "chat") {
+      // fire the global event so Topbar can open its modal
+      window.dispatchEvent(new Event("openInquiry"));
     }
   };
 
@@ -234,7 +238,7 @@ export default function EtsyStyleHeader() {
           elevation={10}
           sx={{
             position: "fixed",
-            bottom: 12,
+            bottom: 0,
             left: "50%",
             transform: "translateX(-50%)",
             width: "95%",
