@@ -35,7 +35,7 @@ app.get("/", (req, res) => {
 });
 
 //ADMIN -> MIDDLEWARE -> SERVER
-app.use('/',inquirysection);
+app.use('/inquiry',inquirysection);
 
 
 // Start server

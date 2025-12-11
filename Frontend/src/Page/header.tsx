@@ -14,17 +14,12 @@ import {
   ListItemButton,
   ListItemText,
   Divider,
-  BottomNavigation,
-  BottomNavigationAction,
-  Paper,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
-import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
-import HomeIcon from "@mui/icons-material/Home";
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 
 const SearchContainer = styled("div")(() => ({
   position: "relative",
@@ -63,7 +58,6 @@ export default function EtsyStyleHeader() {
   const showSearchAndRight = !(isMobile || isTablet);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [bottomNavValue, setBottomNavValue] = useState("home");
 
   const categories = [
     "Home & Living",
@@ -78,22 +72,6 @@ export default function EtsyStyleHeader() {
 
   const logoUrl =
     "https://i.ibb.co/JRPnDfqQ/cmh6a26eo000h04jmaveg5yzp-removebg-preview.png";
-
-  const isDarkMode = theme.palette.mode === "dark";
-  const bgColor = isDarkMode ? "#0f172a" : "#ffffff";
-  const iconColor = isDarkMode ? "#cbd5e1" : "#555";
-
-  // Updated handler to open drawer when clicking "Categories" and dispatch event for "chat"
-  const handleBottomNavClick = (value: string) => {
-    setBottomNavValue(value);
-    if (value === "categories") {
-      setDrawerOpen(true);
-    }
-    if (value === "chat") {
-      // fire the global event so Topbar can open its modal
-      window.dispatchEvent(new Event("openInquiry"));
-    }
-  };
 
   return (
     <>
@@ -162,7 +140,7 @@ export default function EtsyStyleHeader() {
                 placeholder="Search for anything"
                 inputProps={{ "aria-label": "search" }}
               />
-              <SearchButton>
+              <SearchButton aria-label="search-button">
                 <SearchIcon />
               </SearchButton>
             </SearchContainer>
@@ -178,8 +156,12 @@ export default function EtsyStyleHeader() {
                   p: 1,
                   "&:hover": { bgcolor: "#dcdcdc" },
                 }}
+                aria-label="shopping-bag"
               >
-                <ShoppingCartOutlinedIcon sx={{ color: "#555" }} />
+                <ShoppingBagOutlinedIcon
+                  fontSize="medium"
+                  sx={{ fontSize: 22, color: "#555" }}
+                />
               </IconButton>
             ) : (
               <IconButton onClick={() => setDrawerOpen(true)} sx={{ color: "#555" }}>
@@ -231,80 +213,6 @@ export default function EtsyStyleHeader() {
           </Typography>
         </Box>
       </Drawer>
-
-      {/* MOBILE / TABLET BOTTOM NAV */}
-      {(isMobile || isTablet) && (
-        <Paper
-          elevation={10}
-          sx={{
-            position: "fixed",
-            bottom: 0,
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "95%",
-            maxWidth: 500,
-            bgcolor: bgColor,
-            borderRadius: 2,
-            p: 1.3,
-          }}
-        >
-          <BottomNavigation
-            showLabels
-            value={bottomNavValue}
-            onChange={(_, newValue) => handleBottomNavClick(newValue)}
-            sx={{
-              bgcolor: "transparent",
-              height: 70,
-              display: "flex",
-              justifyContent: "space-around",
-            }}
-          >
-            {[
-              { label: "Home", value: "home", icon: <HomeIcon /> },
-              { label: "Categories", value: "categories", icon: <MenuIcon /> },
-              { label: "Cart", value: "addcard", icon: <ShoppingCartOutlinedIcon /> },
-              { label: "Chat", value: "chat", icon: <ChatBubbleOutlineIcon /> },
-            ].map((item) => (
-              <BottomNavigationAction
-                key={item.value}
-                value={item.value}
-                label={item.label}
-                icon={
-                  <Box
-                    sx={{
-                      p: 1.5,
-                      borderRadius: "50%",
-                      bgcolor: bottomNavValue === item.value ? "#000" : "transparent",
-                      color: bottomNavValue === item.value ? "#fff" : iconColor,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      transition: "all 0.25s ease",
-                      "&:hover": {
-                        transform: "scale(1.15)",
-                        bgcolor:
-                          bottomNavValue === item.value
-                            ? "#000"
-                            : "rgba(0,0,0,0.08)",
-                      },
-                    }}
-                  >
-                    {item.icon}
-                  </Box>
-                }
-                sx={{
-                  "& .MuiBottomNavigationAction-label": {
-                    fontFamily: '"Montserrat", sans-serif',
-                    fontSize: "0.7rem",
-                    marginTop: "4px",
-                    color: bottomNavValue === item.value ? "#000" : "#777",
-                  },
-                }}
-              />
-            ))}
-          </BottomNavigation>
-        </Paper>
-      )}
     </>
   );
 }
