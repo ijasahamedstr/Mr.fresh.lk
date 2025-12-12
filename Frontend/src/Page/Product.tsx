@@ -28,7 +28,6 @@ type ProductProps = {
   popularProducts?: SpecialProduct[];
   // accept a combined all-products array (data+images)
   allProductsCombined?: SpecialProduct[];
-  selectedCategory?: string;
   totalProducts?: number; // optional total count to display (defaults to 20)
   pageSize?: number; // pagination page size for "All Products"
   cardsCount?: number; // number of cards in first row (defaults to 5)
@@ -191,7 +190,6 @@ const Product: React.FC<ProductProps> = React.memo(
     productsSpecial = defaultSpecials,
     popularProducts = defaultPopular,
     allProductsCombined = defaultAllProductsCombined,
-    selectedCategory,
     totalProducts = 20,
     pageSize = 12,
     cardsCount = 5,

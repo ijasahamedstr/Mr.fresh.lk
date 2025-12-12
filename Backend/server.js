@@ -3,7 +3,7 @@ import express from "express";
 import connectDB from "./lib/db.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import inquirysection from "./routes/inquiry.route.js";
+import Inquirysection from "./routes/Inquiry.route.js";
 
 
 // Create an instance of Express
@@ -35,7 +35,7 @@ app.get("/", (req, res) => {
 });
 
 //ADMIN -> MIDDLEWARE -> SERVER
-app.use('/inquiry',inquirysection);
+app.use('/inquiry',Inquirysection);
 
 
 // Start server

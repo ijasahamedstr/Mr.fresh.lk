@@ -4,12 +4,10 @@ import {
   useMediaQuery,
   useTheme,
   Typography,
-  IconButton,
   AppBar,
   Toolbar,
 } from "@mui/material";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+
 import Banner from "./Banner";
 import Product from "./Product";
 
@@ -49,7 +47,7 @@ const CategoryItem: React.FC<CategoryItemProps> = React.memo(
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontWeight: 400, // NORMAL FONT
+          fontWeight: 400,
           fontSize: 13,
           mr: 1.25,
           cursor: "pointer",
@@ -101,7 +99,7 @@ const MainHome: React.FC = () => {
         overflow: "hidden",
       }}
     >
-      {/* MOBILE TOP BAR (NO SEARCH BAR) */}
+      {/* MOBILE TOP BAR */}
       {!isDesktop && (
         <AppBar
           position="static"
@@ -117,7 +115,7 @@ const MainHome: React.FC = () => {
         </AppBar>
       )}
 
-      {/* LEFT CATEGORY COLUMN (DESKTOP ONLY - NO SEARCH BAR) */}
+      {/* LEFT DESKTOP CATEGORY MENU */}
       {isDesktop && (
         <Box
           sx={{
@@ -133,11 +131,16 @@ const MainHome: React.FC = () => {
             gap: 2,
           }}
         >
-          <Typography sx={{ fontWeight: 600, fontSize: 16 , fontFamily: "'Montserrat', sans-serif"}}>
+          <Typography
+            sx={{
+              fontWeight: 600,
+              fontSize: 16,
+              fontFamily: "'Montserrat', sans-serif",
+            }}
+          >
             Categories
           </Typography>
 
-          {/* CATEGORY LIST */}
           <Box
             sx={{
               display: "flex",
@@ -156,7 +159,7 @@ const MainHome: React.FC = () => {
                   borderRadius: 1.5,
                   cursor: "pointer",
                   "&:hover": { background: "#f5f5f5" },
-                  fontWeight: 400, // NORMAL FONT
+                  fontWeight: 400,
                   display: "flex",
                   justifyContent: "space-between",
                 }}
@@ -172,7 +175,7 @@ const MainHome: React.FC = () => {
         </Box>
       )}
 
-      {/* RIGHT MAIN SECTION */}
+      {/* RIGHT MAIN AREA */}
       <Box
         sx={{
           flex: 1,
@@ -198,7 +201,7 @@ const MainHome: React.FC = () => {
           <Banner />
         </Box>
 
-        {/* MOBILE CATEGORY STRIP (NO MENU ICONS) */}
+        {/* MOBILE CATEGORY SLIDER */}
         {!isDesktop && (
           <Box
             sx={{
@@ -231,7 +234,7 @@ const MainHome: React.FC = () => {
           </Box>
         )}
 
-        {/* MAIN CONTENT */}
+        {/* MAIN PRODUCT AREA */}
         <Box
           sx={{
             flex: 1,
@@ -245,7 +248,7 @@ const MainHome: React.FC = () => {
             },
           }}
         >
-          <Product selectedCategory={selectedCategory} />
+          <Product  />
         </Box>
       </Box>
     </Box>

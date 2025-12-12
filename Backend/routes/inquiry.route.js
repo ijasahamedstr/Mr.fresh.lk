@@ -1,21 +1,17 @@
 import express from 'express';
-import { inquirycreate } from '../controller/inquiry.Controller.js';
+import { Inquirycreate, InquiryIndex, InquirySingleDetails } from '../controller/Inquiry.Controller.js';
 
 // Create a new router instance
-const inquirysection = express.Router();
+const Inquirysection = express.Router();
 // Create the Data Register
-inquirysection.post('/',inquirycreate );
+Inquirysection.post('/',Inquirycreate );
 
 // // View the Data Register
+Inquirysection.get('/',InquiryIndex);
 
 // // View the Single Data Register
-// inquirysection.get("/:id",);
-
-// //Delete Data Register
-// inquirysection.delete('/:id',);
-
-// //Update Data Register
-// inquirysection.put('/:id',);
+Inquirysection.get("/:id",InquirySingleDetails);
 
 
-export default inquirysection;
+
+export default Inquirysection;
