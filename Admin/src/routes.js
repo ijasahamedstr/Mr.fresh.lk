@@ -10,9 +10,9 @@ import EditSlider from "layouts/Slider-section/EditSlider";
 import InquirySectionView from "layouts/Inquire Here";
 import RequestServicesView from "layouts/Request Service";
 import OttServiceGridView from "layouts/OTT-Service";
-import EditOttService from "layouts/OTT-Service/Edit-ott-Service";
 import CategoriesAdmin from "layouts/Categories";
 import AddCategory from "layouts/Categories/AddCategory";
+import EditCategory from "layouts/Categories/EditCategory";
 
 const routes = [
   {
@@ -85,8 +85,8 @@ const routes = [
     component: <EditSlider />,
   },
   {
-    route: "/EditOTT/:id",
-    component: <EditOttService />,
+    route: "/EditCategory/:id",
+    component: <EditCategory />,
   },
 ];
 

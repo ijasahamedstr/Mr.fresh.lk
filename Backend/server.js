@@ -6,9 +6,7 @@ import cookieParser from "cookie-parser";
 import AccountAdminloginrouter from './routes/AccountLogin.route.js';
 import AccountAdminrouter from "./routes/AccountRegisterAdmin.route.js";
 import Inquirysection from "./routes/Inquiry.route.js";
-import Requestservices from "./routes/Requestservices.route.js";
 import Slidersection from "./routes/Slidersection.route.js";
-import OrderserviceSection from "./routes/Order.route.js";
 import Categorysection from "./routes/Categories.route.js";
 
 // Create an instance of Express
@@ -24,7 +22,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "http://localhost:3001",
+      "http://localhost:3002",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
@@ -43,19 +41,15 @@ app.get("/", (req, res) => {
 //ADMIN -> MIDDLEWARE -> SERVER
 app.use('/Adminlogin', AccountAdminloginrouter);
 app.use('/Adminregister',AccountAdminrouter);
-app.use('/Inquiry',Inquirysection);
-app.use('/Requestservices',Requestservices);
-app.use('/Odder',OrderserviceSection);
-
-
 app.use('/Slidersection',Slidersection);
 app.use("/Categorysection", Categorysection);
+app.use('/inquiry',Inquirysection);
 
 
 
 
 // Start server
-const port = 8000;
+const port = 8001;
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });

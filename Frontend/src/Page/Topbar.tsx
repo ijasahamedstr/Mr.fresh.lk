@@ -12,24 +12,39 @@ import {
   Snackbar,
   Alert,
   CircularProgress,
+  Drawer,
+  IconButton,
 } from "@mui/material";
-import { Phone, Email } from "@mui/icons-material";
+import {
+  Phone,
+  Email,
+  WhatsApp,
+  Facebook,
+  Instagram,
+  YouTube,
+  Close as CloseIcon,
+} from "@mui/icons-material";
 
 const inquiryTypes = [
   { value: "Payment Issue", label: "Payment Issue" },
-  { value: "Delivery Issue", label: "Delivery Issue" },
   { value: "Product Issue", label: "Product Issue" },
   { value: "General Inquiry", label: "General Inquiry" },
-  { value: "Request Product", label: "Request Product" },
+  { value: "Request Service", label: "Request Service" },
 ];
 
 const Montserrat = '"Montserrat", sans-serif';
 
+// cart keys used across the app
+const CART_KEY = "cartCourses";
+const OTT_CART_KEY = "ottCart";
+
 const Topbar: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
 
   const [open, setOpen] = useState(false);
+  const [socialDrawerOpen, setSocialDrawerOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
@@ -62,7 +77,6 @@ const Topbar: React.FC = () => {
     return () => {
       window.removeEventListener("openInquiry", onOpenInquiry);
     };
-    // intentionally no dependencies so it registers once
   }, []);
 
   const handleChange = (
@@ -96,13 +110,30 @@ const Topbar: React.FC = () => {
 *Description:* 
 ${formData.description || "N/A"}
 
-_Sent via MrFresh.lk Inquiry Form_
+_Sent via buycourse.lk Inquiry Form_
     `;
     const phoneNumber = "94767080553";
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
       message
     )}`;
     window.open(url, "_blank");
+  };
+
+  const clearAllOrderLocalStorage = () => {
+    try {
+      // clear shared cart used by Couresview / PremiumaccountView
+      localStorage.removeItem(CART_KEY);
+      // clear any old OTT-specific cart if still used
+      localStorage.removeItem(OTT_CART_KEY);
+
+      try {
+        window.dispatchEvent(new Event("cartCleared"));
+      } catch {
+        // ignore
+      }
+    } catch {
+      // ignore storage errors
+    }
   };
 
   const handleSaveAndShare = async () => {
@@ -158,6 +189,7 @@ _Sent via MrFresh.lk Inquiry Form_
 
       setTimeout(() => {
         openWhatsApp();
+        clearAllOrderLocalStorage();
         resetForm();
         handleClose();
       }, 300);
@@ -200,20 +232,22 @@ _Sent via MrFresh.lk Inquiry Form_
         {/* LEFT COLUMN */}
         <Box
           sx={{
-            width: isMobile ? "50%" : "80%",
+            width: isMobile ? "55%" : "75%",
             display: "flex",
             alignItems: "center",
             px: { xs: 1, sm: 2, md: 4 },
             color: "#fff",
             gap: { xs: 0.5, sm: 1.5, md: 3 },
+            overflow: "hidden",
           }}
         >
           <Typography
             variant="body2"
             sx={{
               fontWeight: 600,
-              color: "#c2d142",
+              color: "#FFFFFF",
               fontFamily: Montserrat,
+              whiteSpace: "nowrap",
             }}
           >
             Need Assistance? Contact Us:
@@ -226,9 +260,10 @@ _Sent via MrFresh.lk Inquiry Form_
                   display: "flex",
                   alignItems: "center",
                   fontFamily: Montserrat,
+                  fontSize: "0.8rem",
                 }}
               >
-                <Phone sx={{ mr: 1 }} />
+                <Phone sx={{ mr: 0.5, fontSize: "1rem" }} />
                 <Link
                   href="tel:+94767080553"
                   underline="none"
@@ -244,49 +279,332 @@ _Sent via MrFresh.lk Inquiry Form_
                   display: "flex",
                   alignItems: "center",
                   fontFamily: Montserrat,
+                  fontSize: "0.8rem",
                 }}
               >
-                <Email sx={{ mr: 1 }} />
+                <Email sx={{ mr: 0.5, fontSize: "1rem" }} />
                 <Link
-                  href="mailto:info@fresh.lk"
+                  href="mailto:info@buycourse.lk"
                   underline="none"
                   color="inherit"
                   sx={{ fontFamily: Montserrat }}
                 >
-                  info@fresh.lk
+                  info@buycourse.lk
                 </Link>
               </Typography>
             </>
           )}
         </Box>
 
-        {/* RIGHT COLUMN */}
+        {/* RIGHT COLUMN (SOCIAL + BUTTON) */}
         <Box
           sx={{
-            width: isMobile ? "50%" : "20%",
+            width: isMobile ? "45%" : "25%",
             display: "flex",
             alignItems: "center",
             justifyContent: "flex-end",
             px: { xs: 1, sm: 2, md: 4 },
+            gap: { xs: 0.5, sm: 1 },
           }}
         >
+          {/* Social Icons - DESKTOP ONLY */}
+          {!isMobile && !isTablet && (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: { xs: 0.7, sm: 1.2 },
+                mr: { xs: 0.5, sm: 1.5 },
+              }}
+            >
+              {/* WhatsApp */}
+              <Link
+                href="https://wa.me/94767080553"
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  width: { xs: 26, sm: 30 },
+                  height: { xs: 26, sm: 30 },
+                  borderRadius: "50%",
+                  backgroundColor: "#25D366",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#fff",
+                  "&:hover": { opacity: 0.85 },
+                }}
+              >
+                <WhatsApp sx={{ fontSize: { xs: 17, sm: 19 } }} />
+              </Link>
+
+              {/* Facebook */}
+              <Link
+                href="https://www.facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  width: { xs: 26, sm: 30 },
+                  height: { xs: 26, sm: 30 },
+                  borderRadius: "50%",
+                  backgroundColor: "#1877F2",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#fff",
+                  "&:hover": { opacity: 0.85 },
+                }}
+              >
+                <Facebook sx={{ fontSize: { xs: 17, sm: 19 } }} />
+              </Link>
+
+              {/* Instagram */}
+              <Link
+                href="https://www.instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  width: { xs: 26, sm: 30 },
+                  height: { xs: 26, sm: 30 },
+                  borderRadius: "50%",
+                  background:
+                    "linear-gradient(45deg, #FEDA75, #FA7E1E, #D62976, #962FBF, #4F5BD5)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#fff",
+                  "&:hover": { opacity: 0.85 },
+                }}
+              >
+                <Instagram sx={{ fontSize: { xs: 17, sm: 19 } }} />
+              </Link>
+
+              {/* YouTube */}
+              <Link
+                href="https://www.youtube.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  width: { xs: 26, sm: 30 },
+                  height: { xs: 26, sm: 30 },
+                  borderRadius: "50%",
+                  backgroundColor: "#FF0000",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#fff",
+                  "&:hover": { opacity: 0.85 },
+                }}
+              >
+                <YouTube sx={{ fontSize: { xs: 17, sm: 19 } }} />
+              </Link>
+            </Box>
+          )}
+
+          {/* Mobile / Tablet: button to open SOCIAL DRAWER */}
+          {(isMobile || isTablet) && (
+            <IconButton
+              onClick={() => setSocialDrawerOpen(true)}
+              sx={{
+                mr: { xs: 0.5, sm: 1 },
+                color: "#fff",
+              }}
+              aria-label="open social links"
+            >
+              <WhatsApp sx={{ fontSize: { xs: 20, sm: 22 } }} />
+            </IconButton>
+          )}
+
           <Button
             variant="contained"
             onClick={handleOpen}
             sx={{
               textTransform: "none",
-              backgroundColor: "#c2d142",
-              color: "#000",
+              background:
+                "linear-gradient(135deg, #c2d142 0%, #a8bb2f 100%)",
+              color: "#1f2937",
               fontWeight: 600,
               borderRadius: "50px",
-              fontSize: "0.75rem",
+              fontSize: { xs: "0.65rem", sm: "0.75rem" },
               fontFamily: Montserrat,
+              px: { xs: 1.5, sm: 2.5 },
+              minWidth: "auto",
+              whiteSpace: "nowrap",
             }}
           >
             Inquire Here
           </Button>
         </Box>
       </Box>
+
+      {/* SOCIAL MEDIA DRAWER (Mobile / Tablet) */}
+      <Drawer
+        anchor="right"
+        open={socialDrawerOpen}
+        onClose={() => setSocialDrawerOpen(false)}
+        PaperProps={{
+          sx: {
+            width: 260,
+            p: 2,
+            bgcolor: "#111827",
+            color: "#fff",
+            fontFamily: Montserrat,
+          },
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
+          <Typography
+            variant="subtitle1"
+            sx={{ fontFamily: Montserrat, fontWeight: 600 }}
+          >
+            Follow us
+          </Typography>
+          <IconButton
+            onClick={() => setSocialDrawerOpen(false)}
+            sx={{ color: "#fff" }}
+            aria-label="close social drawer"
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
+
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+          {/* WhatsApp */}
+          <Button
+            component={Link}
+            href="https://wa.me/94767080553"
+            target="_blank"
+            rel="noopener noreferrer"
+            startIcon={
+              <Box
+                sx={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: "50%",
+                  backgroundColor: "#25D366",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#fff",
+                }}
+              >
+                <WhatsApp sx={{ fontSize: 18 }} />
+              </Box>
+            }
+            sx={{
+              justifyContent: "flex-start",
+              color: "#e5e7eb",
+              textTransform: "none",
+              fontFamily: Montserrat,
+            }}
+          >
+            WhatsApp
+          </Button>
+
+          {/* Facebook */}
+          <Button
+            component={Link}
+            href="https://www.facebook.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            startIcon={
+              <Box
+                sx={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: "50%",
+                  backgroundColor: "#1877F2",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#fff",
+                }}
+              >
+                <Facebook sx={{ fontSize: 18 }} />
+              </Box>
+            }
+            sx={{
+              justifyContent: "flex-start",
+              color: "#e5e7eb",
+              textTransform: "none",
+              fontFamily: Montserrat,
+            }}
+          >
+            Facebook
+          </Button>
+
+          {/* Instagram */}
+          <Button
+            component={Link}
+            href="https://www.instagram.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            startIcon={
+              <Box
+                sx={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: "50%",
+                  background:
+                    "linear-gradient(45deg, #FEDA75, #FA7E1E, #D62976, #962FBF, #4F5BD5)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#fff",
+                }}
+              >
+                <Instagram sx={{ fontSize: 18 }} />
+              </Box>
+            }
+            sx={{
+              justifyContent: "flex-start",
+              color: "#e5e7eb",
+              textTransform: "none",
+              fontFamily: Montserrat,
+            }}
+          >
+            Instagram
+          </Button>
+
+          {/* YouTube */}
+          <Button
+            component={Link}
+            href="https://www.youtube.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            startIcon={
+              <Box
+                sx={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: "50%",
+                  backgroundColor: "#FF0000",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#fff",
+                }}
+              >
+                <YouTube sx={{ fontSize: 18 }} />
+              </Box>
+            }
+            sx={{
+              justifyContent: "flex-start",
+              color: "#e5e7eb",
+              textTransform: "none",
+              fontFamily: Montserrat,
+            }}
+          >
+            YouTube
+          </Button>
+        </Box>
+      </Drawer>
 
       {/* FORM MODAL */}
       <Modal open={open} onClose={handleClose}>
@@ -301,11 +619,15 @@ _Sent via MrFresh.lk Inquiry Form_
             borderRadius: 2,
             p: 1,
             boxShadow: 24,
-            // ensure modal content uses Montserrat
             fontFamily: Montserrat,
           }}
         >
-          <Typography variant="h6" fontWeight={700} mb={2} sx={{ fontFamily: Montserrat }}>
+          <Typography
+            variant="h6"
+            fontWeight={700}
+            mb={2}
+            sx={{ fontFamily: Montserrat }}
+          >
             Inquiry Form
           </Typography>
 
@@ -335,10 +657,16 @@ _Sent via MrFresh.lk Inquiry Form_
             value={formData.type}
             onChange={handleChange}
             {...textFieldCommon}
-            SelectProps={{ MenuProps: { PaperProps: { sx: { fontFamily: Montserrat } } } }}
+            SelectProps={{
+              MenuProps: { PaperProps: { sx: { fontFamily: Montserrat } } },
+            }}
           >
             {inquiryTypes.map((option) => (
-              <MenuItem key={option.value} value={option.value} sx={{ fontFamily: Montserrat }}>
+              <MenuItem
+                key={option.value}
+                value={option.value}
+                sx={{ fontFamily: Montserrat }}
+              >
                 {option.label}
               </MenuItem>
             ))}
@@ -384,18 +712,27 @@ _Sent via MrFresh.lk Inquiry Form_
             onClick={handleSaveAndShare}
             disabled={loading}
             sx={{
-              bgcolor: "#c2d142",
+              background:
+                "linear-gradient(135deg, #c2d142 0%, #a8bb2f 100%)",
               color: "#000",
               textTransform: "none",
               fontFamily: Montserrat,
             }}
           >
-            {loading ? <CircularProgress size={20} /> : "Save & Send to WhatsApp"}
+            {loading ? (
+              <CircularProgress size={20} />
+            ) : (
+              "Save & Send to WhatsApp"
+            )}
           </Button>
         </Box>
       </Modal>
 
-      <Snackbar open={snackbar.open} autoHideDuration={5000} onClose={handleSnackbarClose}>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={5000}
+        onClose={handleSnackbarClose}
+      >
         <Alert
           onClose={handleSnackbarClose}
           severity={snackbar.severity}

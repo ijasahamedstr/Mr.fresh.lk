@@ -12,9 +12,7 @@ export const createCategorySection = async (req, res) => {
       return res.status(400).json({ message: "Categories are required" });
     }
 
-    // Keep only one category tree
-    await CategorySection.deleteMany({});
-
+    // ✅ NO DELETE — old data will remain
     const data = await CategorySection.create({ categories });
 
     res.status(201).json({
@@ -25,6 +23,7 @@ export const createCategorySection = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 /**
  * GET ALL (returns latest tree)
