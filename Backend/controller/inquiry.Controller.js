@@ -54,21 +54,3 @@ export const InquiryIndex = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
   };
-
-// single inquiry View 
-export const  InquirySingleDetails = async (req, res) => {
-    try {
-        const  InquirySingleView = await Inquiry.findById(req.params.id);
-        if (InquirySingleView == null) {
-            return res.status(404).json({ message: "Cannot Find The News" });
-        }
-        else {
-            res.json(InquirySingleView);
-        }
-    } catch (error) {
-        return res.status(500).json({ message: error.message });
-    }
-  };
-
-
-

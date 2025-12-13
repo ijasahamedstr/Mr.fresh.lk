@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import Grid from "@mui/material/Grid";
@@ -6,6 +6,8 @@ import Card from "@mui/material/Card";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
@@ -28,14 +30,22 @@ const AddSlider = () => {
     sliderimagelink: "",
   });
 
+  const [previewUrl, setPreviewUrl] = useState("");
+
+  useEffect(() => {
+    // If sliderimagelink is a valid URL, show preview
+    if (SliderDetails.sliderimagelink && isValidUrl(SliderDetails.sliderimagelink)) {
+      setPreviewUrl(SliderDetails.sliderimagelink);
+    } else {
+      setPreviewUrl("");
+    }
+  }, [SliderDetails.sliderimagelink]);
+
   const isValidUrl = (url) => {
     if (!url) return false;
-
     try {
       const parsed = new URL(url);
-
       const imageExtRegex = /\.(jpeg|jpg|png|gif|webp|svg)(\?.*)?$/i;
-
       return (
         imageExtRegex.test(parsed.pathname) ||
         /^https?:\/\/.+\.(?:jpg|jpeg|png|gif|webp|svg)$/i.test(url)
@@ -89,6 +99,7 @@ const AddSlider = () => {
     });
 
     try {
+      // send JSON only (no file upload)
       const response = await axios.post(
         `${process.env.REACT_APP_API_HOST}/slidersection`,
         SliderDetails
@@ -98,7 +109,6 @@ const AddSlider = () => {
 
       if (!response || response.status >= 300 || apiError) {
         Swal.close();
-
         await Swal.fire({
           icon: "error",
           title: "Oops...",
@@ -109,7 +119,6 @@ const AddSlider = () => {
         });
       } else {
         Swal.close();
-
         await Swal.fire({
           icon: "success",
           title: "Success!",
@@ -117,10 +126,10 @@ const AddSlider = () => {
         });
 
         setSliderDetails({ slidername: "", sliderimagelink: "" });
+        setPreviewUrl("");
       }
     } catch (err) {
       Swal.close();
-
       await Swal.fire({
         icon: "error",
         title: "Request failed",
@@ -163,43 +172,97 @@ const AddSlider = () => {
 
               <MDBox pt={3} px={2} sx={{ paddingBottom: "24px" }}>
                 <form onSubmit={handleSubmit} noValidate>
-                  <TextField
-                    label="Slider Name"
-                    variant="outlined"
-                    fullWidth
-                    sx={{ mb: 2 }}
-                    name="slidername"
-                    value={SliderDetails.slidername}
-                    onChange={handleChange}
-                    error={Boolean(errors.slidername)}
-                    helperText={errors.slidername}
-                  />
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        label="Slider Name"
+                        variant="outlined"
+                        fullWidth
+                        sx={{ mb: 2 }}
+                        name="slidername"
+                        value={SliderDetails.slidername}
+                        onChange={handleChange}
+                        error={Boolean(errors.slidername)}
+                        helperText={errors.slidername}
+                      />
 
-                  <TextField
-                    label="Slider Image Link (optional)"
-                    variant="outlined"
-                    fullWidth
-                    sx={{ mb: 2 }}
-                    name="sliderimagelink"
-                    value={SliderDetails.sliderimagelink}
-                    onChange={handleChange}
-                    error={Boolean(errors.sliderimagelink)}
-                    helperText={
-                      errors.sliderimagelink || "Use a direct image URL (jpg, png, gif, webp, svg)."
-                    }
-                  />
+                      <TextField
+                        label="Slider Image Link (optional)"
+                        variant="outlined"
+                        fullWidth
+                        sx={{ mb: 2 }}
+                        name="sliderimagelink"
+                        value={SliderDetails.sliderimagelink}
+                        onChange={handleChange}
+                        error={Boolean(errors.sliderimagelink)}
+                        helperText={
+                          errors.sliderimagelink ||
+                          "Use a direct image URL (jpg, png, gif, webp, svg)."
+                        }
+                      />
 
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    sx={{ color: "#FFFFFF", height: 48 }}
-                    disabled={loading}
-                    startIcon={loading ? <CircularProgress size={20} /> : null}
-                  >
-                    {loading ? "Submitting..." : "Submit"}
-                  </Button>
+                      <Box sx={{ mt: 2 }}>
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          color="primary"
+                          fullWidth
+                          sx={{ color: "#FFFFFF", height: 48 }}
+                          disabled={loading}
+                          startIcon={loading ? <CircularProgress size={20} /> : null}
+                        >
+                          {loading ? "Submitting..." : "Submit"}
+                        </Button>
+                      </Box>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                        Image preview
+                      </Typography>
+
+                      <Box
+                        sx={{
+                          width: "100%",
+                          minHeight: 180,
+                          borderRadius: 2,
+                          border: "1px dashed rgba(0,0,0,0.12)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          overflow: "hidden",
+                          p: 1,
+                        }}
+                      >
+                        {previewUrl ? (
+                          <img
+                            src={previewUrl}
+                            alt="Slider image preview"
+                            style={{
+                              maxWidth: "100%",
+                              maxHeight: 320,
+                              objectFit: "contain",
+                              display: "block",
+                            }}
+                          />
+                        ) : (
+                          <Typography
+                            variant="body2"
+                            color="textSecondary"
+                            align="center"
+                            sx={{ px: 2 }}
+                          >
+                            No image selected. Enter an image URL on the left to preview it here.
+                          </Typography>
+                        )}
+                      </Box>
+
+                      <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+                        Tip: provide a direct image URL (no upload). The component will send the URL
+                        to your API on submit.
+                      </Typography>
+                    </Grid>
+                  </Grid>
                 </form>
               </MDBox>
             </Card>

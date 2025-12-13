@@ -3,8 +3,13 @@ import express from "express";
 import connectDB from "./lib/db.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import AccountAdminloginrouter from './routes/AccountLogin.route.js';
+import AccountAdminrouter from "./routes/AccountRegisterAdmin.route.js";
 import Inquirysection from "./routes/Inquiry.route.js";
-
+import Requestservices from "./routes/Requestservices.route.js";
+import Slidersection from "./routes/Slidersection.route.js";
+import OrderserviceSection from "./routes/Order.route.js";
+import Categorysection from "./routes/Categories.route.js";
 
 // Create an instance of Express
 const app = express();
@@ -19,10 +24,11 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://digilasersa-admin.vercel.app"
+      "http://localhost:3001",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -35,7 +41,17 @@ app.get("/", (req, res) => {
 });
 
 //ADMIN -> MIDDLEWARE -> SERVER
-app.use('/inquiry',Inquirysection);
+app.use('/Adminlogin', AccountAdminloginrouter);
+app.use('/Adminregister',AccountAdminrouter);
+app.use('/Inquiry',Inquirysection);
+app.use('/Requestservices',Requestservices);
+app.use('/Odder',OrderserviceSection);
+
+
+app.use('/Slidersection',Slidersection);
+app.use("/Categorysection", Categorysection);
+
+
 
 
 // Start server

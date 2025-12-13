@@ -25,7 +25,7 @@ import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 
-const DEFAULT_IMAGE =
+const DEFAULT_ICON =
   "https://img.freepik.com/premium-vector/no-photo-available-vector-icon-default-image-symbol-picture-coming-soon-web-site-mobile-app_87543-18055.jpg";
 
 /* small meta chip */
@@ -45,8 +45,8 @@ MetaChip.propTypes = {
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
 };
 
-function CourseCard({ course, onDelete, deletingId }) {
-  const isDeleting = deletingId === course._id;
+function CategoryCard({ category, onDelete, deletingId }) {
+  const isDeleting = deletingId === category._id;
 
   return (
     <Card
@@ -64,13 +64,13 @@ function CourseCard({ course, onDelete, deletingId }) {
       <Box sx={{ position: "relative" }}>
         <CardMedia
           component="img"
-          height={160}
-          image={course.courseImage || DEFAULT_IMAGE}
-          alt={course.courseName || "Course image"}
+          height={140}
+          image={category.categoriesIcon || category.menuIcon || DEFAULT_ICON}
+          alt={category.name || "Category icon"}
           sx={{
-            width: 350,
-            height: 160,
-            objectFit: "contain", // show full image without cropping
+            width: "100%",
+            height: 140,
+            objectFit: "contain",
             backgroundColor: "#fafafa",
             borderBottom: "1px solid rgba(0,0,0,0.04)",
             padding: 1,
@@ -95,7 +95,7 @@ function CourseCard({ course, onDelete, deletingId }) {
             WebkitBoxOrient: "vertical",
           }}
         >
-          {course.courseName || "Untitled Course"}
+          {category.name || "Untitled Category"}
         </Typography>
 
         <Typography
@@ -112,26 +112,20 @@ function CourseCard({ course, onDelete, deletingId }) {
             minHeight: 38,
           }}
         >
-          {course.courseDescription || "No description provided."}
+          {category.description || "No description provided."}
         </Typography>
 
         <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1, flexWrap: "wrap" }}>
-          <MetaChip
-            label="Price"
-            value={course.coursePrice != null ? `LKR ${course.coursePrice}` : "Free"}
-          />
-          <MetaChip label="Duration" value={course.duration || "—"} />
-          <MetaChip label="Category" value={course.courseCategory || "—"} />
+          <MetaChip label="Main" value={category.isMain ? "Yes" : "No"} />
+          <MetaChip label="Parent" value={category.parent ? category.parent : "—"} />
+          <MetaChip label="Order" value={category.order ?? "0"} />
         </Box>
       </CardContent>
 
       <CardActions sx={{ p: 2, pt: 0, justifyContent: "space-between", alignItems: "center" }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Box />
-        </Box>
-
+        <Box />
         <Box sx={{ display: "flex", gap: 1 }}>
-          <Link to={`/Editcoures/${course._id}`} style={{ textDecoration: "none" }}>
+          <Link to={`/EditCategory/${category._id}`} style={{ textDecoration: "none" }}>
             <IconButton size="small" color="primary">
               <EditIcon fontSize="small" />
             </IconButton>
@@ -139,10 +133,10 @@ function CourseCard({ course, onDelete, deletingId }) {
 
           <IconButton
             size="small"
-            onClick={() => onDelete && onDelete(course._id)}
+            onClick={() => onDelete && onDelete(category._id)}
             sx={{ color: "error.main" }}
             disabled={isDeleting}
-            aria-label={isDeleting ? "Deleting course" : "Delete course"}
+            aria-label={isDeleting ? "Deleting category" : "Delete category"}
           >
             {isDeleting ? <CircularProgress size={16} /> : <DeleteIcon fontSize="small" />}
           </IconButton>
@@ -152,46 +146,48 @@ function CourseCard({ course, onDelete, deletingId }) {
   );
 }
 
-CourseCard.propTypes = {
-  course: PropTypes.object.isRequired,
+CategoryCard.propTypes = {
+  category: PropTypes.object.isRequired,
   onDelete: PropTypes.func,
   deletingId: PropTypes.string,
 };
 
-export default function CourseGridView() {
-  const [courses, setCourses] = useState([]);
+export default function CategoriesGridView() {
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const apiBase = process.env.REACT_APP_API_HOST || "";
 
   // Pagination state
   const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(8); // default page size
+  const [rowsPerPage, setRowsPerPage] = useState(8);
 
   // Deleting indicator
   const [deletingId, setDeletingId] = useState(null);
 
-  // Use a single endpoint constant (fix typo to "Courses")
-  const COURSES_ENDPOINT = `${apiBase}/Couressection`;
+  // Endpoint for categories (adjust if your server uses different route)
+  const CATEGORIES_ENDPOINT = `${apiBase}/Categories`;
 
   useEffect(() => {
     let mounted = true;
     const fetchData = async () => {
       try {
-        const res = await axios.get(COURSES_ENDPOINT);
+        const res = await axios.get(CATEGORIES_ENDPOINT);
         const data = res?.data;
         if (mounted) {
-          if (Array.isArray(data)) setCourses(data.slice().reverse());
-          else {
-            setCourses([]);
+          if (Array.isArray(data)) {
+            // reverse so newest appear first (same behavior as original)
+            setCategories(data.slice().reverse());
+          } else {
+            setCategories([]);
             // eslint-disable-next-line no-console
-            console.warn("/Courses returned non-array", data);
+            console.warn("/Categories returned non-array", data);
           }
         }
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.error("Error fetching courses", err);
-        if (mounted) setError("Failed to fetch courses.");
+        console.error("Error fetching categories", err);
+        if (mounted) setError("Failed to fetch categories.");
       } finally {
         if (mounted) setLoading(false);
       }
@@ -200,18 +196,19 @@ export default function CourseGridView() {
     return () => {
       mounted = false;
     };
-  }, [COURSES_ENDPOINT]);
+    // include CATEGORIES_ENDPOINT in deps so hooks linter is satisfied
+  }, [CATEGORIES_ENDPOINT]);
 
-  // Update page if courses length changes so current page is not out of range
+  // Keep page within bounds when categories length or rowsPerPage change
   useEffect(() => {
-    const totalPages = Math.max(1, Math.ceil(courses.length / rowsPerPage));
+    const totalPages = Math.max(1, Math.ceil(categories.length / rowsPerPage));
     if (page > totalPages) setPage(totalPages);
-  }, [courses.length, rowsPerPage]);
+  }, [categories.length, rowsPerPage, page]);
 
   const handleDelete = async (id) => {
     if (!id) {
       console.warn("handleDelete called without id");
-      Swal.fire("Error!", "Invalid course id.", "error");
+      Swal.fire("Error!", "Invalid category id.", "error");
       return;
     }
 
@@ -228,33 +225,32 @@ export default function CourseGridView() {
 
     try {
       setDeletingId(id);
-      await axios.delete(`${COURSES_ENDPOINT}/${id}`);
-      setCourses((prev) => prev.filter((c) => c._id !== id));
-      Swal.fire("Deleted!", "The course has been deleted.", "success");
+      await axios.delete(`${CATEGORIES_ENDPOINT}/${id}`);
+      setCategories((prev) => prev.filter((c) => c._id !== id));
+      Swal.fire("Deleted!", "The category has been deleted.", "success");
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error("Error deleting course", err);
-      Swal.fire("Error!", "There was an issue deleting the course.", "error");
+      console.error("Error deleting category", err);
+      Swal.fire("Error!", "There was an issue deleting the category.", "error");
     } finally {
       setDeletingId(null);
     }
   };
 
   // Pagination helpers
-  const totalPages = Math.max(1, Math.ceil(courses.length / rowsPerPage));
+  const totalPages = Math.max(1, Math.ceil(categories.length / rowsPerPage));
   const startIndex = (page - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
-  const visibleCourses = courses.slice(startIndex, endIndex);
+  const visibleCategories = categories.slice(startIndex, endIndex);
 
   const handlePageChange = (event, value) => {
     setPage(value);
-    // scroll to top of the grid on page change
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(Number(event.target.value));
-    setPage(1); // reset to first page when page size changes
+    setPage(1);
   };
 
   if (loading) {
@@ -293,41 +289,40 @@ export default function CourseGridView() {
       <DashboardNavbar />
       <MDBox pt={6} pb={3}>
         <MDBox display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <MDTypography variant="h6">Courses</MDTypography>
+          <MDTypography variant="h6">Categories</MDTypography>
 
           <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-            <Link to="/Addcoures" style={{ textDecoration: "none" }}>
+            <Link to="/AddCategory" style={{ textDecoration: "none" }}>
               <Button variant="contained" startIcon={<AddIcon />}>
-                Add Course
+                Add Category
               </Button>
             </Link>
 
-            {/* optional: rows per page control */}
+            {/* optional: rows per page control (left empty for now) */}
             <FormControl size="small" sx={{ minWidth: 120 }}></FormControl>
           </Box>
         </MDBox>
 
         <Grid container spacing={3}>
-          {visibleCourses.length === 0 ? (
+          {visibleCategories.length === 0 ? (
             <Grid item xs={12}>
               <Card sx={{ p: 4, textAlign: "center" }}>
-                <Typography variant="h6">No courses found.</Typography>
+                <Typography variant="h6">No categories found.</Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {'Click "Add Course" to create your first course.'}
+                  Click &quot;Add Category&quot; to create your first category.
                 </Typography>
               </Card>
             </Grid>
           ) : (
-            visibleCourses.map((course) => (
-              <Grid item key={course._id} xs={12} sm={6} md={4} lg={3}>
-                <CourseCard course={course} onDelete={handleDelete} deletingId={deletingId} />
+            visibleCategories.map((category) => (
+              <Grid item key={category._id} xs={12} sm={6} md={4} lg={3}>
+                <CategoryCard category={category} onDelete={handleDelete} deletingId={deletingId} />
               </Grid>
             ))
           )}
         </Grid>
 
-        {/* pagination controls */}
-        {courses.length > 0 && (
+        {categories.length > 0 && (
           <MDBox mt={4} display="flex" justifyContent="center" alignItems="center" gap={2}>
             <Pagination
               count={totalPages}

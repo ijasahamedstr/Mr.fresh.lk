@@ -9,12 +9,10 @@ import AddSlider from "layouts/Slider-section/AddSlider";
 import EditSlider from "layouts/Slider-section/EditSlider";
 import InquirySectionView from "layouts/Inquire Here";
 import RequestServicesView from "layouts/Request Service";
-import CourseSectionView from "layouts/Course";
-import AddCourse from "layouts/Course/Addcoures";
-import EditCourse from "layouts/Course/Editcoures";
 import OttServiceGridView from "layouts/OTT-Service";
-import AddOTTService from "layouts/OTT-Service/Add-ott-Service";
 import EditOttService from "layouts/OTT-Service/Edit-ott-Service";
+import CategoriesAdmin from "layouts/Categories";
+import AddCategory from "layouts/Categories/AddCategory";
 
 const routes = [
   {
@@ -51,11 +49,11 @@ const routes = [
   },
   {
     type: "collapse",
-    name: "Course",
-    key: "Course",
+    name: "Categories",
+    key: "Categories",
     icon: <CardGiftcardIcon />,
-    route: "/Course",
-    component: <CourseSectionView />,
+    route: "/Categories",
+    component: <CategoriesAdmin />,
   },
   {
     type: "collapse",
@@ -78,17 +76,10 @@ const routes = [
     component: <AddSlider />,
   },
   {
-    route: "/Addcoures",
-    component: <AddCourse />,
+    route: "/AddCategory",
+    component: <AddCategory />,
   },
-  {
-    route: "/AddOTT",
-    component: <AddOTTService />,
-  },
-  {
-    route: "/Editcoures/:id",
-    component: <EditCourse />,
-  },
+
   {
     route: "/EditSlider/:id",
     component: <EditSlider />,

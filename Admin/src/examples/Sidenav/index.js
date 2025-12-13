@@ -31,6 +31,8 @@ import {
   setWhiteSidenav,
 } from "context";
 
+const newLogo = "https://i.ibb.co/JRPnDfqQ/cmh6a26eo000h04jmaveg5yzp-removebg-preview.png";
+
 function Sidenav({ color, brand, brandName, routes, ...rest }) {
   const [controller, dispatch] = useMaterialUIController();
   const { miniSidenav, transparentSidenav, whiteSidenav, darkMode, sidenavColor } = controller;
@@ -48,24 +50,16 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
   const closeSidenav = () => setMiniSidenav(dispatch, true);
 
   useEffect(() => {
-    // A function that sets the mini state of the sidenav.
     function handleMiniSidenav() {
       setMiniSidenav(dispatch, window.innerWidth < 1200);
       setTransparentSidenav(dispatch, window.innerWidth < 1200 ? false : transparentSidenav);
       setWhiteSidenav(dispatch, window.innerWidth < 1200 ? false : whiteSidenav);
     }
 
-    /** 
-     The event listener that's calling the handleMiniSidenav function when resizing the window.
-    */
     window.addEventListener("resize", handleMiniSidenav);
-
-    // Call the handleMiniSidenav function to set the state with the initial value.
     handleMiniSidenav();
-
-    // Remove event listener on cleanup
     return () => window.removeEventListener("resize", handleMiniSidenav);
-  }, [dispatch, location]);
+  }, [dispatch, location, transparentSidenav, whiteSidenav]);
 
   // Render all the routes from the routes.js (All the visible items on the Sidenav)
   const renderRoutes = routes.map(({ type, name, icon, title, noCollapse, key, href, route }) => {
@@ -123,6 +117,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
 
     return returnValue;
   });
+
   return (
     <SidenavRoot
       {...rest}
@@ -130,6 +125,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
       ownerState={{ transparentSidenav, whiteSidenav, miniSidenav, darkMode }}
     >
       <MDBox pt={3} pb={1} px={4} textAlign="center">
+        {/* close button for small screens */}
         <MDBox
           display={{ xs: "block", xl: "none" }}
           position="absolute"
@@ -143,34 +139,51 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
             <Icon sx={{ fontWeight: "bold" }}>close</Icon>
           </MDTypography>
         </MDBox>
-        <MDBox component={NavLink} to="/" display="flex" alignItems="center">
-          <img
-            src="https://i.ibb.co/hRZ1bMy/78-removebg-preview.png"
-            alt="Responsive Image"
-            style={{
-              width: "100%",
-              height: "auto",
-            }}
-          />
+
+        {/* logo + brand area with hover effects and mini state support */}
+        <MDBox
+          component={NavLink}
+          to="/"
+          display="flex"
+          alignItems="center"
+          sx={{ textDecoration: "none" }}
+        >
           <MDBox
-            width={!brandName && "100%"}
-            sx={(theme) => sidenavLogoLabel(theme, { miniSidenav })}
+            sx={(theme) => ({
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: theme.shape.borderRadius,
+              overflow: "hidden",
+              boxShadow: miniSidenav ? "none" : "0 6px 18px rgba(15, 23, 42, 0.12)",
+              transition: "all 200ms ease",
+              mr: miniSidenav ? 0 : 1.5,
+              "&:hover img": {
+                transform: "scale(1.05) rotate(-3deg)",
+              },
+            })}
           >
-            <MDTypography
-              component="h6"
-              variant="button"
-              fontWeight="medium"
-              color={textColor}
-            ></MDTypography>
+            <img
+              src={newLogo}
+              alt="Logo"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                transition: "transform 200ms",
+              }}
+            />
           </MDBox>
         </MDBox>
       </MDBox>
+
       <Divider
         light={
           (!darkMode && !whiteSidenav && !transparentSidenav) ||
           (darkMode && !transparentSidenav && whiteSidenav)
         }
       />
+
       <List>{renderRoutes}</List>
     </SidenavRoot>
   );
