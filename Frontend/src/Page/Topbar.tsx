@@ -110,7 +110,7 @@ const Topbar: React.FC = () => {
 *Description:* 
 ${formData.description || "N/A"}
 
-_Sent via buycourse.lk Inquiry Form_
+_Sent via mrfresh.lk Inquiry Form_
     `;
     const phoneNumber = "94767080553";
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
@@ -284,12 +284,12 @@ _Sent via buycourse.lk Inquiry Form_
               >
                 <Email sx={{ mr: 0.5, fontSize: "1rem" }} />
                 <Link
-                  href="mailto:info@buycourse.lk"
+                  href="mailto:info@mrfresh.lk"
                   underline="none"
                   color="inherit"
                   sx={{ fontFamily: Montserrat }}
                 >
-                  info@buycourse.lk
+                  info@mrfresh.lk
                 </Link>
               </Typography>
             </>

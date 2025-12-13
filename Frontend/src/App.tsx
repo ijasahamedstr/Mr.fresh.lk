@@ -1,5 +1,5 @@
 import Header from "./Page/header"
-import Inquiries from "./Page/MainHome"
+import MainHome from "./Page/MainHome"
 import Topbar from "./Page/Topbar"
 
 function App() {
@@ -8,7 +8,7 @@ function App() {
     <>
      <Topbar/>
      <Header/>
-     <Inquiries/>
+     <MainHome/>
     </>
   )
 }
