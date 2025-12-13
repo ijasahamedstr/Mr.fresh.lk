@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import {
   AppBar,
   Toolbar,
@@ -21,6 +22,10 @@ import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 
+const API_HOST = import.meta.env.VITE_API_HOST as string | undefined;
+
+/* ---------------- STYLED ---------------- */
+
 const SearchContainer = styled("div")(() => ({
   position: "relative",
   flexGrow: 1,
@@ -36,8 +41,7 @@ const SearchContainer = styled("div")(() => ({
 const StyledInput = styled(InputBase)(() => ({
   flex: 1,
   padding: "10px 16px",
-  fontSize: "0.95rem",
-  color: "#333",
+  fontSize: "1rem",
   fontFamily: '"Montserrat", sans-serif',
 }));
 
@@ -46,10 +50,79 @@ const SearchButton = styled(IconButton)(() => ({
   color: "#fff",
   borderRadius: "50%",
   marginRight: "6px",
-  "&:hover": {
-    backgroundColor: "#b0c635",
-  },
 }));
+
+/* ---------------- TYPES ---------------- */
+
+type CategoryNode = {
+  id: string;
+  title: string;
+  icon?: string;
+  children?: CategoryNode[];
+};
+
+/* ---------------- RECURSIVE CATEGORY LIST ---------------- */
+
+const RenderCategories = ({
+  items,
+  level = 0,
+}: {
+  items: CategoryNode[];
+  level?: number;
+}) => (
+  <>
+    {items.map((cat) => (
+      <Box key={cat.id}>
+        <ListItem disablePadding>
+          <ListItemButton
+            sx={{
+              pl: 2 + level * 2,
+              py: 1.2,
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+            }}
+          >
+            {/* ICON */}
+            {cat.icon && (
+              <Box
+                component="img"
+                src={cat.icon}
+                sx={{
+                  width: level === 0 ? 26 : 22,
+                  height: level === 0 ? 26 : 22,
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  background: "#f4f6f8",
+                  padding: "3px",
+                }}
+              />
+            )}
+
+            {/* TITLE */}
+            <ListItemText
+              primary={cat.title}
+              primaryTypographyProps={{
+                sx: {
+                  fontFamily: '"Montserrat", sans-serif',
+                  fontSize: level === 0 ? 16 : 14,
+                  fontWeight: level === 0 ? 600 : 400,
+                },
+              }}
+            />
+          </ListItemButton>
+        </ListItem>
+
+        {/* CHILDREN */}
+        {cat.children && cat.children.length > 0 && (
+          <RenderCategories items={cat.children} level={level + 1} />
+        )}
+      </Box>
+    ))}
+  </>
+);
+
+/* ---------------- MAIN COMPONENT ---------------- */
 
 export default function EtsyStyleHeader() {
   const theme = useTheme();
@@ -58,20 +131,25 @@ export default function EtsyStyleHeader() {
   const showSearchAndRight = !(isMobile || isTablet);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
-
-  const categories = [
-    "Home & Living",
-    "Jewelry & Accessories",
-    "Clothing & Shoes",
-    "Wedding & Party",
-    "Toys & Entertainment",
-    "Art & Collectibles",
-    "Craft Supplies",
-    "Vintage",
-  ];
+  const [categories, setCategories] = useState<CategoryNode[]>([]);
 
   const logoUrl =
     "https://i.ibb.co/JRPnDfqQ/cmh6a26eo000h04jmaveg5yzp-removebg-preview.png";
+
+  /* ---------------- FETCH CATEGORIES ---------------- */
+
+  useEffect(() => {
+    if (!API_HOST) return;
+
+    axios
+      .get(`${API_HOST}/Categorysection`)
+      .then((res) => {
+        setCategories(res.data?.categories || []);
+      })
+      .catch((err) => {
+        console.error("Failed to load categories", err);
+      });
+  }, []);
 
   return (
     <>
@@ -83,6 +161,7 @@ export default function EtsyStyleHeader() {
           color: "#000",
           px: { xs: 3, sm: 6, md: 10 },
           mt: "55px",
+          fontFamily: '"Montserrat", sans-serif',
         }}
       >
         <Toolbar
@@ -95,37 +174,25 @@ export default function EtsyStyleHeader() {
             py: 1,
           }}
         >
-          {/* Left Logo */}
+          {/* LOGO */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Box
-              component="img"
-              src={logoUrl}
-              alt="Logo"
-              sx={{
-                height: "100%",
-                width: "auto",
-                cursor: "pointer",
-                objectFit: "contain",
-              }}
-            />
+            <Box component="img" src={logoUrl} sx={{ height: 50 }} />
 
             {showSearchAndRight && (
               <Box
                 onClick={() => setDrawerOpen(true)}
                 sx={{
                   display: "flex",
-                  alignItems: "center",
                   gap: 1,
-                  fontSize: "0.9rem",
-                  color: "#555",
                   cursor: "pointer",
-                  fontFamily: '"Montserrat", sans-serif',
+                  alignItems: "center",
                 }}
               >
                 <MenuIcon fontSize="small" />
                 <Typography
-                  variant="body2"
-                  sx={{ fontWeight: 500, fontFamily: '"Montserrat", sans-serif' }}
+                  fontWeight={600}
+                  fontSize={16}
+                  sx={{ fontFamily: '"Montserrat", sans-serif' }}
                 >
                   Categories
                 </Typography>
@@ -133,81 +200,56 @@ export default function EtsyStyleHeader() {
             )}
           </Box>
 
-          {/* Search */}
+          {/* SEARCH */}
           {showSearchAndRight && (
             <SearchContainer>
-              <StyledInput
-                placeholder="Search for anything"
-                inputProps={{ "aria-label": "search" }}
-              />
-              <SearchButton aria-label="search-button">
+              <StyledInput placeholder="Search for anything" />
+              <SearchButton>
                 <SearchIcon />
               </SearchButton>
             </SearchContainer>
           )}
 
-          {/* Right icons */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          {/* CART / MENU */}
+          <IconButton onClick={() => setDrawerOpen(true)}>
             {showSearchAndRight ? (
-              <IconButton
-                sx={{
-                  bgcolor: "#E7E5E4",
-                  borderRadius: "50%",
-                  p: 1,
-                  "&:hover": { bgcolor: "#dcdcdc" },
-                }}
-                aria-label="shopping-bag"
-              >
-                <ShoppingBagOutlinedIcon
-                  fontSize="medium"
-                  sx={{ fontSize: 22, color: "#555" }}
-                />
-              </IconButton>
+              <ShoppingBagOutlinedIcon />
             ) : (
-              <IconButton onClick={() => setDrawerOpen(true)} sx={{ color: "#555" }}>
-                <MenuIcon />
-              </IconButton>
+              <MenuIcon />
             )}
-          </Box>
+          </IconButton>
         </Toolbar>
       </AppBar>
 
-      {/* Drawer */}
+      {/* DRAWER */}
       <Drawer anchor="left" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
         <Box
-          sx={{ width: 260, fontFamily: '"Montserrat", sans-serif', py: 2 }}
-          role="presentation"
-          onClick={() => setDrawerOpen(false)}
-          onKeyDown={() => setDrawerOpen(false)}
+          sx={{
+            width: 280,
+            py: 2,
+            fontFamily: '"Montserrat", sans-serif',
+          }}
         >
+          {/* LOGO */}
           <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-            <Box
-              component="img"
-              src={logoUrl}
-              alt="Logo"
-              sx={{ height: 60, width: "auto", objectFit: "contain" }}
-            />
+            <Box component="img" src={logoUrl} sx={{ height: 60 }} />
           </Box>
 
+          {/* CATEGORY LIST */}
           <List>
-            {categories.map((text) => (
-              <ListItem key={text} disablePadding>
-                <ListItemButton>
-                  <ListItemText
-                    primary={text}
-                    primaryTypographyProps={{
-                      sx: { fontFamily: '"Montserrat", sans-serif', fontWeight: 500 },
-                    }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))}
+            <RenderCategories items={categories} />
           </List>
 
           <Divider />
+
           <Typography
-            variant="body2"
-            sx={{ px: 2, py: 1, color: "#777", fontFamily: '"Montserrat", sans-serif' }}
+            sx={{
+              px: 2,
+              py: 1.5,
+              color: "#777",
+              fontSize: 14,
+              fontFamily: '"Montserrat", sans-serif',
+            }}
           >
             View all categories
           </Typography>

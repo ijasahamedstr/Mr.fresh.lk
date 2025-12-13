@@ -146,7 +146,7 @@ const ProductCard: React.FC<{
   };
 
   return (
-    <Card sx={{ borderRadius: 3, boxShadow: "0 6px 18px rgba(0,0,0,0.06)", overflow: "hidden", minWidth: 0 }}>
+    <Card sx={{ borderRadius: 3, boxShadow: "0 6px 18px rgba(0,0,0,0.06)", overflow: "hidden", minWidth: 0, p: 0,m: 0, }}>
       <CardMedia
         component="img"
         image={product.img}
@@ -308,13 +308,16 @@ const Product: React.FC<ProductProps> = React.memo(
       <Box
         sx={{
           width: "100%",
-          px: { xs: 2, md: 3 },
-          py: { xs: 2, md: 3 },
+          // MODIFIED: setting padding to 0 for the md breakpoint (min-width: 900px)
+          px: { xs: 0, md: 0 }, 
+          py: { xs: 0, md: 0 },
           fontFamily: "Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
         }}
       >
         {/* TODAY SPECIAL (slider) */}
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
+        {/* Added internal padding back for the section headers and buttons for better look on small screens */}
+        {/* Changed md: 0 to md: 3 to ensure internal content is not flush with the edge on large screens */}
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1, px: { xs: 2, md: 3 } }}>
           <Typography sx={{ fontSize: 22, fontWeight: 800, fontFamily: cardFontFamily }}>Today Special Offer</Typography>
 
           <Box sx={{ display: "flex", gap: 1 }}>
@@ -343,18 +346,21 @@ const Product: React.FC<ProductProps> = React.memo(
             scrollbarWidth: "none", // firefox
             msOverflowStyle: "none", // IE 10+
             "&::-webkit-scrollbar": { display: "none", height: 0 }, // webkit
+            // Added horizontal padding to the scrollable container to align with titles on xs/md
+            px: { xs: 2, md: 3 },
             "& > .card-snap": {
               scrollSnapAlign: "start",
               flex: "0 0 auto",
-              // mobile: full width -> exactly 1 card per view
-              width: { xs: "100%", sm: "72%", md: `calc((100% - ${gapPx * (cardsCount - 1)}px)/${Math.min(cardsCount, 3)})`, lg: `calc((100% - ${gapPx * (cardsCount - 1)}px)/${cardsCount})` },
-              minWidth: { xs: "100%", sm: 260 },
+              // mobile: full width -> exactly 1 card per view (This is why we need external padding on the container)
+              width: { xs: "calc(100% - 4px)", sm: "72%", md: `calc((100% - ${gapPx * (cardsCount - 1)}px)/${Math.min(cardsCount, 3)})`, lg: `calc((100% - ${gapPx * (cardsCount - 1)}px)/${cardsCount})` },
+              minWidth: { xs: "calc(100% - 4px)", sm: 260 },
             },
           }}
         >
           {firstRowProducts.map((data, idx) => {
             const uniqueKey = `${data.id ?? `idx-${idx}`}-${idx}`;
             return (
+              // Removed minWidth from Card's parent Box to let the wrapper control minWidth
               <Box key={`card-${uniqueKey}`} className="card-snap" sx={{ minWidth: 0 }}>
                 <ProductCard product={data} imgHeight={imgHeight} actionButtonSx={actionButtonSx} isSm={isSm} cardFontFamily={cardFontFamily} onAddToBag={onAddToBag} />
               </Box>
@@ -363,7 +369,8 @@ const Product: React.FC<ProductProps> = React.memo(
         </Box>
 
         {/* POPULAR (slider) */}
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+        {/* Added internal padding back for the section headers and buttons for better look on small screens */}
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2, px: { xs: 2, md: 3 } }}>
           <Typography sx={{ fontSize: 22, fontWeight: 800, fontFamily: cardFontFamily }}>Popular Products</Typography>
 
           <Box sx={{ display: "flex", gap: 1 }}>
@@ -391,11 +398,13 @@ const Product: React.FC<ProductProps> = React.memo(
             scrollbarWidth: "none",
             msOverflowStyle: "none",
             "&::-webkit-scrollbar": { display: "none", height: 0 },
+            // Added horizontal padding to the scrollable container to align with titles on xs/md
+            px: { xs: 2, md: 3 },
             "& > .card-snap": {
               scrollSnapAlign: "start",
               flex: "0 0 auto",
-              width: { xs: "100%", sm: "72%", md: "33%", lg: "20%" },
-              minWidth: { xs: "100%", sm: 240 },
+              width: { xs: "calc(100% - 4px)", sm: "72%", md: "33%", lg: "20%" },
+              minWidth: { xs: "calc(100% - 4px)", sm: 240 },
             },
           }}
         >
@@ -407,7 +416,8 @@ const Product: React.FC<ProductProps> = React.memo(
         </Box>
 
         {/* ALL PRODUCTS (grid, no slider) */}
-        <Box sx={{ mt: 2 }}>
+        {/* Added internal padding back to ensure content is not flush with the edge on large screens */}
+        <Box sx={{ mt: 2, px: { xs: 2, md: 3 } }}>
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
             <Typography sx={{ fontSize: 22, fontWeight: 800, fontFamily: cardFontFamily }}>All Products</Typography>
           </Box>
