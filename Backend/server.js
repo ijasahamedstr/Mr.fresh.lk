@@ -5,7 +5,6 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import AccountAdminloginrouter from './routes/AccountLogin.route.js';
 import AccountAdminrouter from "./routes/AccountRegisterAdmin.route.js";
-// import Inquirysection from "./routes/Inquiry.route.js";
 import Slidersection from "./routes/Slidersection.route.js";
 import Categorysection from "./routes/Categories.route.js";
 import Productssection from "./routes/Product.routes.js";
@@ -22,8 +21,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: [
-      "http://localhost:5173",
-      "http://localhost:3002",
+      "https://mr-fresh-lk.vercel.app",
+      "https://mr-fresh-lk-admin.vercel.app",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
