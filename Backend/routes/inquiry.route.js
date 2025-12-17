@@ -2,12 +2,12 @@ import express from 'express';
 import { Inquirycreate, InquiryIndex } from '../controller/Inquiry.Controller.js';
 
 // Create a new router instance
-const Inquirysection = express.Router();
+const inquirysection = express.Router();
 // Create the Data Register
-Inquirysection.post('/', Inquirycreate);
+inquirysection.post('/', Inquirycreate);
 
 // // View the Data Register
-Inquirysection.get('/',InquiryIndex);
+inquirysection.get('/',InquiryIndex);
 
 
-export default Inquirysection;
+export default inquirysection;
