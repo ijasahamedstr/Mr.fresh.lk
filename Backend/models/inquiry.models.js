@@ -7,7 +7,6 @@ const InquirySchema = new mongoose.Schema({
     inquirytype: String,
     ordernumber: String,
     orderdate: String,
-    description: String,
     date: String,
 });
 
