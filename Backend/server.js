@@ -8,7 +8,6 @@ import AccountAdminrouter from "./routes/AccountRegisterAdmin.route.js";
 import Slidersection from "./routes/Slidersection.route.js";
 import Categorysection from "./routes/Categories.route.js";
 import Productssection from "./routes/Product.routes.js";
-import Inquirysection from "./routes/Inquiry.route.js";
 
 // Create an instance of Express
 const app = express();
