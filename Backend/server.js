@@ -21,8 +21,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: [
-      "https://mr-fresh-lk.vercel.app",
-      "https://mr-fresh-lk-admin.vercel.app",
+      "http://localhost:5173",
+      "http://localhost:3002",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
@@ -43,7 +43,6 @@ app.use('/Adminlogin', AccountAdminloginrouter);
 app.use('/Adminregister',AccountAdminrouter);
 app.use('/Slidersection',Slidersection);
 app.use("/Categorysection", Categorysection);
-// app.use('/inquiry',Inquirysection);
 app.use("/Products",Productssection);
 
 

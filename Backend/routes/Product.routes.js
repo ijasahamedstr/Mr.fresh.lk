@@ -1,5 +1,5 @@
 import express from 'express';
-import { createProduct, getProducts } from '../controller/Product.controller.js';
+import { createProduct, deleteProduct, getProductById, getProducts, updateProduct } from '../controller/Product.controller.js';
 
 // Create a new router instance
 const Productssection = express.Router();
@@ -9,5 +9,11 @@ Productssection.post('/',createProduct);
 
 // View the Data Register
 Productssection.get('/',getProducts);
+
+Productssection.get("/:id", getProductById);
+
+Productssection.put("/:id",updateProduct);
+
+Productssection.delete("/:id",deleteProduct);
 
 export default Productssection;

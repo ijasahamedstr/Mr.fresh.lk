@@ -3,102 +3,238 @@ import PropTypes from "prop-types";
 import axios from "axios";
 import Swal from "sweetalert2";
 
-import Grid from "@mui/material/Grid";
-import Card from "@mui/material/Card";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
-import IconButton from "@mui/material/IconButton";
-import Divider from "@mui/material/Divider";
+/* ---------------- MUI ---------------- */
+import { Card, Box, Chip, IconButton, Divider, CircularProgress } from "@mui/material";
 
+/* ---------------- ICONS ---------------- */
 import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
-// Material Dashboard
+/* ---------------- DASHBOARD ---------------- */
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 
-/* ---------------------------------------------
-   Recursive Tree Node
---------------------------------------------- */
-function TreeNode({ node }) {
-  return (
-    <Box ml={2} mt={0.5}>
-      <Box display="flex" alignItems="center" gap={1}>
-        <MDTypography variant="button" fontSize="0.8rem">
-          {node.title}
-        </MDTypography>
+/* =========================================================
+   LKR FORMAT
+========================================================= */
+const formatLKR = (value) =>
+  new Intl.NumberFormat("en-LK", {
+    style: "currency",
+    currency: "LKR",
+    minimumFractionDigits: 2,
+  }).format(value || 0);
 
-        {node.icon && (
-          <Box
-            component="img"
-            src={node.icon}
-            alt="icon"
-            sx={{ width: 14, height: 14, borderRadius: "50%" }}
-          />
-        )}
+/* =========================================================
+   PRODUCT ITEM
+========================================================= */
+function ProductItem({ product, onDelete }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Card sx={{ mb: 2, p: 2, borderRadius: 2 }}>
+      {/* BASIC INFO */}
+      <Box display="flex" justifyContent="space-between">
+        <Box>
+          <MDTypography sx={{ fontSize: "0.95rem", fontWeight: 600 }}>{product.name}</MDTypography>
+
+          <MDTypography sx={{ fontSize: "0.7rem", color: "text.secondary" }}>
+            Category: {product.category}
+          </MDTypography>
+
+          <MDTypography sx={{ fontSize: "0.9rem", fontWeight: 600, color: "#1b5e20" }}>
+            {formatLKR(product.price)}
+          </MDTypography>
+
+          <Box display="flex" gap={0.5} mt={0.5}>
+            <Chip label={`Qty: ${product.quantity}`} size="small" />
+            {product.soldOut && <Chip label="Sold Out" size="small" color="error" />}
+            {!product.visibility && <Chip label="Hidden" size="small" />}
+          </Box>
+        </Box>
+
+        {/* ACTIONS */}
+        <Box>
+          <IconButton
+            size="small"
+            color="primary"
+            component="a"
+            href={`/EditProduct/${product._id}`}
+          >
+            <EditIcon fontSize="small" />
+          </IconButton>
+
+          <IconButton size="small" color="error" onClick={() => onDelete(product._id)}>
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+
+          <IconButton size="small" onClick={() => setOpen(!open)}>
+            {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          </IconButton>
+        </Box>
       </Box>
 
-      {Array.isArray(node.children) &&
-        node.children.map((child) => <TreeNode key={child.id} node={child} />)}
+      {/* DETAILS */}
+      {open && (
+        <>
+          <Divider sx={{ my: 1.5 }} />
+
+          {/* PRODUCT DETAILS */}
+          <Box display="grid" gridTemplateColumns="repeat(2,1fr)" gap={1}>
+            <Detail label="SKU" value={product.sku} />
+            <Detail label="Weight" value={product.weight} />
+            <Detail label="Original Price" value={formatLKR(product.originalPrice)} />
+            <Detail label="Track Qty" value={product.trackQty ? "Yes" : "No"} />
+            <Detail label="Min / Max Qty" value={`${product.minQty} / ${product.maxQty}`} />
+            <Detail label="Tags" value={product.tags} />
+          </Box>
+
+          <Box mt={1}>
+            <Detail label="Description" value={product.description} />
+          </Box>
+
+          {/* PRODUCT IMAGES */}
+          {product.images?.length > 0 && (
+            <Box mt={2}>
+              <MDTypography sx={{ fontSize: "0.8rem", fontWeight: 600 }}>
+                Product Images
+              </MDTypography>
+              <Box display="flex" gap={1} mt={0.5} flexWrap="wrap">
+                {product.images.map((img, i) => (
+                  <Box
+                    key={i}
+                    component="img"
+                    src={img}
+                    sx={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: 1,
+                      border: "1px solid #ddd",
+                      objectFit: "cover",
+                    }}
+                  />
+                ))}
+              </Box>
+            </Box>
+          )}
+
+          {/* VARIANTS */}
+          {product.variants?.length > 0 && (
+            <Box mt={2}>
+              <MDTypography sx={{ fontSize: "0.8rem", fontWeight: 600 }}>Variants</MDTypography>
+
+              {product.variants.map((v, i) => (
+                <Box key={i} mt={1} p={1.5} border="1px solid #eee" borderRadius={1.5}>
+                  <MDTypography sx={{ fontSize: "0.9rem", fontWeight: 600 }}>{v.name}</MDTypography>
+
+                  <MDTypography sx={{ fontSize: "0.8rem", color: "#1b5e20" }}>
+                    {formatLKR(v.price)}
+                  </MDTypography>
+
+                  <Box display="grid" gridTemplateColumns="repeat(2,1fr)" gap={0.5} mt={0.5}>
+                    <Detail label="SKU" value={v.sku} />
+                    <Detail label="Qty" value={v.quantity} />
+                    <Detail label="Weight" value={v.weight} />
+                    <Detail label="Sold Out" value={v.soldOut ? "Yes" : "No"} />
+                  </Box>
+
+                  {v.description && (
+                    <Box mt={0.5}>
+                      <Detail label="Description" value={v.description} />
+                    </Box>
+                  )}
+
+                  {/* VARIANT IMAGES */}
+                  {v.images?.length > 0 && (
+                    <Box mt={1}>
+                      <MDTypography sx={{ fontSize: "0.7rem", fontWeight: 600 }}>
+                        Variant Images
+                      </MDTypography>
+                      <Box display="flex" gap={0.5} mt={0.5} flexWrap="wrap">
+                        {v.images.map((img, idx) => (
+                          <Box
+                            key={idx}
+                            component="img"
+                            src={img}
+                            sx={{
+                              width: 52,
+                              height: 52,
+                              borderRadius: 1,
+                              border: "1px solid #ccc",
+                              objectFit: "cover",
+                            }}
+                          />
+                        ))}
+                      </Box>
+                    </Box>
+                  )}
+                </Box>
+              ))}
+            </Box>
+          )}
+        </>
+      )}
+    </Card>
+  );
+}
+
+ProductItem.propTypes = {
+  product: PropTypes.object.isRequired,
+  onDelete: PropTypes.func.isRequired,
+};
+
+/* DETAIL */
+function Detail({ label, value }) {
+  return (
+    <Box>
+      <MDTypography sx={{ fontSize: "0.7rem", color: "text.secondary" }}>{label}</MDTypography>
+      <MDTypography sx={{ fontSize: "0.75rem", fontWeight: 500 }}>{value || "-"}</MDTypography>
     </Box>
   );
 }
 
-TreeNode.propTypes = {
-  node: PropTypes.object.isRequired,
+Detail.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.any,
 };
 
-/* ---------------------------------------------
-   MAIN VIEW
---------------------------------------------- */
-export default function Products() {
-  const [sections, setSections] = useState([]);
+/* MAIN PAGE */
+export default function AllProducts() {
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const apiBase = process.env.REACT_APP_API_HOST || "";
 
-  /* -------- Fetch ALL Category Sections -------- */
   useEffect(() => {
-    const fetchSections = async () => {
+    const load = async () => {
       try {
-        const res = await axios.get(`${apiBase}/Categorysection`);
-        setSections(Array.isArray(res.data) ? res.data : []);
+        const res = await axios.get(`${apiBase}/Products`);
+        setProducts(res.data || []);
       } catch {
-        Swal.fire("Error", "Failed to load categories", "error");
+        Swal.fire("Error", "Failed to load products", "error");
       } finally {
         setLoading(false);
       }
     };
-
-    fetchSections();
+    load();
   }, [apiBase]);
 
-  /* -------- Delete ONE Category Tree -------- */
-  const deleteSection = async (id) => {
+  const deleteProduct = async (id) => {
     const confirm = await Swal.fire({
-      title: "Delete this category tree?",
+      title: "Delete product?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
-      confirmButtonText: "Yes, delete",
     });
 
     if (!confirm.isConfirmed) return;
 
-    try {
-      await axios.delete(`${apiBase}/Categorysection/${id}`);
-      setSections((prev) => prev.filter((item) => item._id !== id));
-      Swal.fire("Deleted", "Category tree deleted successfully", "success");
-    } catch {
-      Swal.fire("Error", "Failed to delete category tree", "error");
-    }
+    await axios.delete(`${apiBase}/Products/${id}`);
+    setProducts((p) => p.filter((x) => x._id !== id));
   };
 
-  /* -------- Loading -------- */
   if (loading) {
     return (
       <DashboardLayout>
@@ -110,113 +246,17 @@ export default function Products() {
     );
   }
 
-  /* -------- UI -------- */
   return (
     <DashboardLayout>
       <DashboardNavbar />
-
       <MDBox pt={6}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <Card>
-              {/* Header */}
-              <MDBox
-                mx={2}
-                mt={-3}
-                py={2}
-                px={2}
-                bgColor="info"
-                borderRadius="lg"
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <MDTypography color="white">Category Trees</MDTypography>
+        <MDTypography sx={{ fontSize: "0.95rem", fontWeight: 600 }} mb={1}>
+          Products
+        </MDTypography>
 
-                <Button
-                  component="a"
-                  href="/AddProducts"
-                  startIcon={<AddIcon />}
-                  variant="contained"
-                  color="success"
-                >
-                  Add
-                </Button>
-              </MDBox>
-
-              {/* Content */}
-              <MDBox p={3}>
-                <Grid container spacing={2}>
-                  {sections.length === 0 ? (
-                    <Grid item xs={12}>
-                      <MDTypography variant="caption">No categories available</MDTypography>
-                    </Grid>
-                  ) : (
-                    sections.map((section, index) => (
-                      <Grid
-                        key={section._id}
-                        item
-                        xs={12}
-                        sm={6}
-                        md={4}
-                        lg={2.4} // ✅ 5 cards per row
-                      >
-                        <Card
-                          sx={{
-                            height: "100%",
-                            borderRadius: 3,
-                            border: "1px solid #eee",
-                            boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
-                          }}
-                        >
-                          {/* Card Header */}
-                          <MDBox
-                            px={1.5}
-                            py={1}
-                            display="flex"
-                            justifyContent="space-between"
-                            alignItems="center"
-                          >
-                            <MDTypography variant="button">Tree #{index + 1}</MDTypography>
-
-                            <Box display="flex">
-                              <IconButton
-                                size="small"
-                                color="primary"
-                                component="a"
-                                href={`/EditCategory/${section._id}`}
-                              >
-                                <EditIcon fontSize="small" />
-                              </IconButton>
-
-                              <IconButton
-                                size="small"
-                                color="error"
-                                onClick={() => deleteSection(section._id)}
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
-                            </Box>
-                          </MDBox>
-
-                          <Divider />
-
-                          {/* Tree */}
-                          <MDBox p={1}>
-                            {Array.isArray(section.categories) &&
-                              section.categories.map((node) => (
-                                <TreeNode key={node.id} node={node} />
-                              ))}
-                          </MDBox>
-                        </Card>
-                      </Grid>
-                    ))
-                  )}
-                </Grid>
-              </MDBox>
-            </Card>
-          </Grid>
-        </Grid>
+        {products.map((product) => (
+          <ProductItem key={product._id} product={product} onDelete={deleteProduct} />
+        ))}
       </MDBox>
     </DashboardLayout>
   );
