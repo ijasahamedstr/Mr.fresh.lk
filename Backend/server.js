@@ -5,7 +5,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import AccountAdminloginrouter from './routes/AccountLogin.route.js';
 import AccountAdminrouter from "./routes/AccountRegisterAdmin.route.js";
-import Inquirysection from "./routes/Inquiry.route.js";
+// import Inquirysection from "./routes/Inquiry.route.js";
 import Slidersection from "./routes/Slidersection.route.js";
 import Categorysection from "./routes/Categories.route.js";
 import Productssection from "./routes/Product.routes.js";
@@ -44,7 +44,7 @@ app.use('/Adminlogin', AccountAdminloginrouter);
 app.use('/Adminregister',AccountAdminrouter);
 app.use('/Slidersection',Slidersection);
 app.use("/Categorysection", Categorysection);
-app.use('/inquiry',Inquirysection);
+// app.use('/inquiry',Inquirysection);
 app.use("/Products",Productssection);
 
 
