@@ -1,5 +1,5 @@
 import express from 'express';
-import { Inquirycreate, InquiryIndex } from '../controller/Inquiry.Controller.js';
+import {Inquirycreate, InquiryIndex } from "../controller/Inquiry.controller.js";
 
 // Create a new router instance
 const Inquirysection = express.Router();

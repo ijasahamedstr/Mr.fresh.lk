@@ -45,7 +45,7 @@ app.use('/Adminregister',AccountAdminrouter);
 app.use('/Slidersection',Slidersection);
 app.use("/Categorysection", Categorysection);
 app.use("/Products",Productssection);
-app.use('/Inquiry',Inquirysection);
+app.use('/inquiry',Inquirysection);
 
 
 
