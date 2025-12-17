@@ -29,6 +29,10 @@ const ProductSchema = new mongoose.Schema(
 
     images: [String],
 
+     /* 🔥 NEW FLAGS */
+    todaySpecial: { type: Boolean, default: false },
+    popularProduct: { type: Boolean, default: false },
+
     visibility: { type: Boolean, default: true },
     soldOut: { type: Boolean, default: false },
     trackQty: { type: Boolean, default: true },

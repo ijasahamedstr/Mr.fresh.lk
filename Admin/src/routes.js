@@ -34,6 +34,7 @@ import AddCategory from "layouts/Categories/AddCategory";
 import EditCategory from "layouts/Categories/EditCategory";
 import Products from "layouts/All-Products";
 import AddProduct from "layouts/All-Products/AddProducts";
+import EditProduct from "layouts/All-Products/EditCategory";
 
 const routes = [
   {
@@ -162,6 +163,10 @@ const routes = [
   {
     route: "/EditCategory/:id",
     component: <EditCategory />,
+  },
+  {
+    route: "/EditProduct/:id",
+    component: <EditProduct />,
   },
 ];
 
