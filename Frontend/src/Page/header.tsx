@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import {
   AppBar,
@@ -15,13 +15,17 @@ import {
   ListItemButton,
   ListItemText,
   Divider,
+  Collapse,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
+/* ---------------- ENV ---------------- */
 const API_HOST = import.meta.env.VITE_API_HOST as string | undefined;
 
 /* ---------------- STYLED ---------------- */
@@ -61,64 +65,85 @@ type CategoryNode = {
   children?: CategoryNode[];
 };
 
-/* ---------------- RECURSIVE CATEGORY LIST ---------------- */
+type CategorySection = {
+  categories: CategoryNode[];
+};
+
+/* ---------------- RECURSIVE CATEGORY ---------------- */
 
 const RenderCategories = ({
   items,
   level = 0,
+  openCategory,
+  onClick,
 }: {
   items: CategoryNode[];
   level?: number;
+  openCategory: string | null;
+  onClick: (cat: CategoryNode) => void;
 }) => (
   <>
-    {items.map((cat) => (
-      <Box key={cat.id}>
-        <ListItem disablePadding>
-          <ListItemButton
-            sx={{
-              pl: 2 + level * 2,
-              py: 1.2,
-              display: "flex",
-              alignItems: "center",
-              gap: 1.5,
-            }}
-          >
-            {/* ICON */}
-            {cat.icon && (
-              <Box
-                component="img"
-                src={cat.icon}
-                sx={{
-                  width: level === 0 ? 26 : 22,
-                  height: level === 0 ? 26 : 22,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  background: "#f4f6f8",
-                  padding: "3px",
+    {items.map((cat) => {
+      const isOpen = openCategory === cat.id;
+
+      return (
+        <Box key={cat.id}>
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => onClick(cat)}
+              sx={{
+                pl: 2 + level * 2,
+                py: 1.2,
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+              }}
+            >
+              {cat.icon && (
+                <Box
+                  component="img"
+                  src={cat.icon}
+                  sx={{
+                    width: level === 0 ? 26 : 22,
+                    height: level === 0 ? 26 : 22,
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    background: "#f4f6f8",
+                    p: "3px",
+                  }}
+                />
+              )}
+
+              <ListItemText
+                primary={cat.title}
+                primaryTypographyProps={{
+                  sx: {
+                    fontFamily: '"Montserrat", sans-serif',
+                    fontSize: level === 0 ? 16 : 14,
+                    fontWeight: level === 0 ? 600 : 400,
+                  },
                 }}
               />
-            )}
 
-            {/* TITLE */}
-            <ListItemText
-              primary={cat.title}
-              primaryTypographyProps={{
-                sx: {
-                  fontFamily: '"Montserrat", sans-serif',
-                  fontSize: level === 0 ? 16 : 14,
-                  fontWeight: level === 0 ? 600 : 400,
-                },
-              }}
-            />
-          </ListItemButton>
-        </ListItem>
+              {cat.children && (
+                isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />
+              )}
+            </ListItemButton>
+          </ListItem>
 
-        {/* CHILDREN */}
-        {cat.children && cat.children.length > 0 && (
-          <RenderCategories items={cat.children} level={level + 1} />
-        )}
-      </Box>
-    ))}
+          {cat.children && (
+            <Collapse in={isOpen} timeout="auto" unmountOnExit>
+              <RenderCategories
+                items={cat.children}
+                level={level + 1}
+                openCategory={openCategory}
+                onClick={onClick}
+              />
+            </Collapse>
+          )}
+        </Box>
+      );
+    })}
   </>
 );
 
@@ -132,6 +157,8 @@ export default function EtsyStyleHeader() {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [categories, setCategories] = useState<CategoryNode[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [openCategory, setOpenCategory] = useState<string | null>(null);
 
   const logoUrl =
     "https://i.ibb.co/JRPnDfqQ/cmh6a26eo000h04jmaveg5yzp-removebg-preview.png";
@@ -141,14 +168,39 @@ export default function EtsyStyleHeader() {
   useEffect(() => {
     if (!API_HOST) return;
 
-    axios
-      .get(`${API_HOST}/Categorysection`)
-      .then((res) => {
-        setCategories(res.data?.categories || []);
-      })
-      .catch((err) => {
+    const fetchCategories = async () => {
+      try {
+        const res = await axios.get(`${API_HOST}/Categorysection`);
+
+        let all: CategoryNode[] = [];
+
+        if (Array.isArray(res.data)) {
+          res.data.forEach((section: CategorySection) => {
+            if (Array.isArray(section.categories)) {
+              all = all.concat(section.categories);
+            }
+          });
+        }
+
+        setCategories(all);
+
+        if (all.length) {
+          setSelectedCategory(all[0].title);
+          setOpenCategory(all[0].id);
+        }
+      } catch (err) {
         console.error("Failed to load categories", err);
-      });
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  /* ---------------- HANDLER ---------------- */
+
+  const handleCategoryClick = useCallback((cat: CategoryNode) => {
+    setSelectedCategory(cat.title);
+    setOpenCategory((prev) => (prev === cat.id ? null : cat.id));
   }, []);
 
   return (
@@ -189,13 +241,7 @@ export default function EtsyStyleHeader() {
                 }}
               >
                 <MenuIcon fontSize="small" />
-                <Typography
-                  fontWeight={600}
-                  fontSize={16}
-                  sx={{ fontFamily: '"Montserrat", sans-serif' }}
-                >
-                  Categories
-                </Typography>
+                <Typography fontWeight={600} sx={{fontFamily: '"Montserrat", sans-serif'}}>Categories</Typography>
               </Box>
             )}
           </Box>
@@ -222,36 +268,24 @@ export default function EtsyStyleHeader() {
       </AppBar>
 
       {/* DRAWER */}
-      <Drawer anchor="left" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
-        <Box
-          sx={{
-            width: 280,
-            py: 2,
-            fontFamily: '"Montserrat", sans-serif',
-          }}
-        >
-          {/* LOGO */}
+      <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+        <Box sx={{ width: 280, py: 2 }}>
           <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
             <Box component="img" src={logoUrl} sx={{ height: 60 }} />
           </Box>
 
-          {/* CATEGORY LIST */}
           <List>
-            <RenderCategories items={categories} />
+            <RenderCategories
+              items={categories}
+              openCategory={openCategory}
+              onClick={handleCategoryClick}
+            />
           </List>
 
           <Divider />
 
-          <Typography
-            sx={{
-              px: 2,
-              py: 1.5,
-              color: "#777",
-              fontSize: 14,
-              fontFamily: '"Montserrat", sans-serif',
-            }}
-          >
-            View all categories
+          <Typography sx={{ px: 2, py: 1.5, color: "#777", fontSize: 14,fontFamily: '"Montserrat", sans-serif' }}>
+            Selected: {selectedCategory}
           </Typography>
         </Box>
       </Drawer>

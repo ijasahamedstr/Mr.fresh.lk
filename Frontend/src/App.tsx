@@ -1,14 +1,21 @@
 import Header from "./Page/header"
-import MainHome from "./Page/MainHome"
+import Home from "./Page/Home";
+import ProductView from "./Page/ProductDetails";
 import Topbar from "./Page/Topbar"
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 function App() {
 
   return (
     <>
-     <Topbar/>
-     <Header/>
-     <MainHome/>
+ <Router>
+      <Topbar />
+      <Header/>     
+      <Routes>
+        <Route path="/" element={< Home/>} />
+         <Route path="/product/:id" element={<ProductView />} />
+      </Routes>
+    </Router>
     </>
   )
 }
