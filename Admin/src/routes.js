@@ -121,24 +121,6 @@ const routes = [
       },
     ],
   },
-
-  {
-    type: "collapse",
-    name: "OTT Service",
-    key: "ott-service",
-    icon: <LiveTvIcon />,
-    collapse: [
-      {
-        type: "collapse",
-        name: "All OTT Services",
-        key: "ott-list",
-        icon: <SubscriptionsIcon />,
-        route: "/OTT-Service",
-        component: <OttServiceGridView />,
-      },
-    ],
-  },
-
   {
     type: "collapse",
     name: "Sign Out",
@@ -153,7 +135,7 @@ const routes = [
     component: <AddCategory />,
   },
   {
-    route: "/AddProducts",
+    route: "/AddProduct",
     component: <AddProduct />,
   },
   {

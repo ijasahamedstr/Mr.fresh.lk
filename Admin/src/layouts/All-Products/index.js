@@ -4,7 +4,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 
 /* ---------------- MUI ---------------- */
-import { Card, Box, Chip, IconButton, Divider, CircularProgress } from "@mui/material";
+import { Card, Box, Chip, IconButton, Divider, CircularProgress, Button } from "@mui/material";
 
 /* ---------------- ICONS ---------------- */
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -82,7 +82,6 @@ function ProductItem({ product, onDelete }) {
         <>
           <Divider sx={{ my: 1.5 }} />
 
-          {/* PRODUCT DETAILS */}
           <Box display="grid" gridTemplateColumns="repeat(2,1fr)" gap={1}>
             <Detail label="SKU" value={product.sku} />
             <Detail label="Weight" value={product.weight} />
@@ -96,7 +95,6 @@ function ProductItem({ product, onDelete }) {
             <Detail label="Description" value={product.description} />
           </Box>
 
-          {/* PRODUCT IMAGES */}
           {product.images?.length > 0 && (
             <Box mt={2}>
               <MDTypography sx={{ fontSize: "0.8rem", fontWeight: 600 }}>
@@ -121,7 +119,6 @@ function ProductItem({ product, onDelete }) {
             </Box>
           )}
 
-          {/* VARIANTS */}
           {product.variants?.length > 0 && (
             <Box mt={2}>
               <MDTypography sx={{ fontSize: "0.8rem", fontWeight: 600 }}>Variants</MDTypography>
@@ -141,13 +138,6 @@ function ProductItem({ product, onDelete }) {
                     <Detail label="Sold Out" value={v.soldOut ? "Yes" : "No"} />
                   </Box>
 
-                  {v.description && (
-                    <Box mt={0.5}>
-                      <Detail label="Description" value={v.description} />
-                    </Box>
-                  )}
-
-                  {/* VARIANT IMAGES */}
                   {v.images?.length > 0 && (
                     <Box mt={1}>
                       <MDTypography sx={{ fontSize: "0.7rem", fontWeight: 600 }}>
@@ -186,7 +176,6 @@ ProductItem.propTypes = {
   onDelete: PropTypes.func.isRequired,
 };
 
-/* DETAIL */
 function Detail({ label, value }) {
   return (
     <Box>
@@ -250,9 +239,27 @@ export default function AllProducts() {
     <DashboardLayout>
       <DashboardNavbar />
       <MDBox pt={6}>
-        <MDTypography sx={{ fontSize: "0.95rem", fontWeight: 600 }} mb={1}>
-          Products
-        </MDTypography>
+        {/* TITLE + ADD BUTTON */}
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+          <MDTypography sx={{ fontSize: "0.95rem", fontWeight: 600 }}>Products</MDTypography>
+
+          <Button
+            variant="contained"
+            size="small"
+            component="a"
+            href="/AddProduct"
+            sx={{
+              color: "#000", // ✅ BLACK TEXT
+              fontWeight: 600,
+              textTransform: "none",
+              "&:hover": {
+                color: "#000",
+              },
+            }}
+          >
+            Add Product
+          </Button>
+        </Box>
 
         {products.map((product) => (
           <ProductItem key={product._id} product={product} onDelete={deleteProduct} />
