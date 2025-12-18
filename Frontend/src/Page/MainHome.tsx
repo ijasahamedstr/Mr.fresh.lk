@@ -102,6 +102,7 @@ const MainHome: React.FC = () => {
         flexDirection: isDesktop ? "row" : "column",
         bgcolor: "#f4f6f8",
         fontFamily: '"Montserrat", sans-serif',
+        color: "#000",
       }}
     >
       {/* MOBILE TOP BAR */}
@@ -110,13 +111,13 @@ const MainHome: React.FC = () => {
           position="static"
           color="transparent"
           elevation={0}
-          sx={{ flexShrink: 0, fontFamily: '"Montserrat", sans-serif' }}
+          sx={{ flexShrink: 0, fontFamily: '"Montserrat", sans-serif', color: "#000" }}
         >
           <Toolbar sx={{ px: 0 }}>
             <Typography
               fontWeight={600}
               fontSize={18}
-              sx={{ fontFamily: '"Montserrat", sans-serif' }}
+              sx={{ fontFamily: '"Montserrat", sans-serif', color: "#000" }}
             >
               Shop
             </Typography>
@@ -137,13 +138,14 @@ const MainHome: React.FC = () => {
             overflowY: "auto",
             flexShrink: 0,
             fontFamily: '"Montserrat", sans-serif',
+            color: "#000",
           }}
         >
           <Typography
             fontWeight={600}
             fontSize={18}
             mb={1.5}
-            sx={{ fontFamily: '"Montserrat", sans-serif' }}
+            sx={{ fontFamily: '"Montserrat", sans-serif', color: "#000" }}
           >
             Categories
           </Typography>
@@ -170,6 +172,7 @@ const MainHome: React.FC = () => {
                           : "transparent",
                       "&:hover": { background: "#f5f5f5" },
                       fontFamily: '"Montserrat", sans-serif',
+                      color: "#000",
                     }}
                   >
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -189,7 +192,7 @@ const MainHome: React.FC = () => {
                       <Typography
                         fontSize={16}
                         fontWeight={500}
-                        sx={{ fontFamily: '"Montserrat", sans-serif' }}
+                        sx={{ fontFamily: '"Montserrat", sans-serif', color: "#000" }}
                       >
                         {cat.title}
                       </Typography>
@@ -198,10 +201,11 @@ const MainHome: React.FC = () => {
                     <Typography
                       sx={{
                         fontSize: 20,
-                        opacity: 0.4,
+                        opacity: 0.6,
                         transform: isOpen ? "rotate(90deg)" : "rotate(0deg)",
                         transition: "transform 0.2s",
                         fontFamily: '"Montserrat", sans-serif',
+                        color: "#000",
                       }}
                     >
                       ›
@@ -223,6 +227,7 @@ const MainHome: React.FC = () => {
                           cursor: "pointer",
                           "&:hover": { background: "#f5f5f5" },
                           fontFamily: '"Montserrat", sans-serif',
+                          color: "#000",
                         }}
                       >
                         {sub.icon && (
@@ -240,7 +245,7 @@ const MainHome: React.FC = () => {
                         )}
                         <Typography
                           fontSize={14}
-                          sx={{ fontFamily: '"Montserrat", sans-serif' }}
+                          sx={{ fontFamily: '"Montserrat", sans-serif', color: "#000" }}
                         >
                           {sub.title}
                         </Typography>
@@ -261,6 +266,7 @@ const MainHome: React.FC = () => {
           gap: 2,
           overflowY: "auto",
           fontFamily: '"Montserrat", sans-serif',
+          color: "#000",
         }}
       >
         <Box
@@ -289,9 +295,8 @@ const MainHome: React.FC = () => {
               flexShrink: 0,
               scrollBehavior: "smooth",
               "&::-webkit-scrollbar": { display: "none" },
-              msOverflowStyle: "none",
-              scrollbarWidth: "none",
               fontFamily: '"Montserrat", sans-serif',
+              color: "#000",
             }}
           >
             {categories.map((cat) => (
@@ -299,13 +304,14 @@ const MainHome: React.FC = () => {
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.title)}
                 sx={{
-                  minWidth: 90, // 👈 controls card width
+                  minWidth: 90,
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   textAlign: "center",
                   cursor: "pointer",
                   fontFamily: '"Montserrat", sans-serif',
+                  color: "#000",
                 }}
               >
                 {cat.icon && (
@@ -328,6 +334,7 @@ const MainHome: React.FC = () => {
                     fontSize: 12,
                     fontWeight: 500,
                     fontFamily: '"Montserrat", sans-serif',
+                    color: "#000",
                   }}
                 >
                   {cat.title}
@@ -337,7 +344,6 @@ const MainHome: React.FC = () => {
           </Box>
         )}
 
-
         <Box
           sx={{
             flex: 1,
@@ -345,6 +351,7 @@ const MainHome: React.FC = () => {
             borderRadius: 2,
             background: "#fff",
             fontFamily: '"Montserrat", sans-serif',
+            color: "#000",
           }}
         >
           <Product />
