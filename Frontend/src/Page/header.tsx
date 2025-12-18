@@ -119,7 +119,6 @@ const RenderCategories = ({
                     width: level === 0 ? 26 : 22,
                     height: level === 0 ? 26 : 22,
                     borderRadius: "50%",
-                    objectFit: "cover",
                     background: "#f4f6f8",
                     p: "3px",
                   }}
@@ -166,7 +165,9 @@ export default function EtsyStyleHeader() {
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const showSearchAndRight = !(isMobile || isTablet);
 
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false); // Categories
+  const [cartOpen, setCartOpen] = useState(false); // 🛒 Cart Drawer
+
   const [categories, setCategories] = useState<CategoryNode[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [openCategory, setOpenCategory] = useState<string | null>(null);
@@ -174,7 +175,7 @@ export default function EtsyStyleHeader() {
   const logoUrl =
     "https://i.ibb.co/JRPnDfqQ/cmh6a26eo000h04jmaveg5yzp-removebg-preview.png";
 
-  /* ---------------- FETCH CATEGORIES (LIFO) ---------------- */
+  /* ---------------- FETCH CATEGORIES ---------------- */
 
   useEffect(() => {
     if (!API_HOST) return;
@@ -193,7 +194,6 @@ export default function EtsyStyleHeader() {
           });
         }
 
-        // 🔥 APPLY LIFO
         const lifoCategories = reverseCategories(all);
 
         setCategories(lifoCategories);
@@ -236,7 +236,6 @@ export default function EtsyStyleHeader() {
             justifyContent: "space-between",
             alignItems: "center",
             gap: 4,
-            flexWrap: "wrap",
             py: 1,
           }}
         >
@@ -255,7 +254,7 @@ export default function EtsyStyleHeader() {
                 }}
               >
                 <MenuIcon fontSize="small" />
-                <Typography fontWeight={600} sx={{ fontFamily: '"Montserrat", sans-serif' }}>
+                <Typography fontWeight={600} sx={{fontFamily: '"Montserrat", sans-serif'}}>
                   Categories
                 </Typography>
               </Box>
@@ -272,24 +271,16 @@ export default function EtsyStyleHeader() {
             </SearchContainer>
           )}
 
-          {/* CART / MENU */}
-          <IconButton onClick={() => setDrawerOpen(true)}>
-            {showSearchAndRight ? (
-              <ShoppingBagOutlinedIcon />
-            ) : (
-              <MenuIcon />
-            )}
+          {/* CART ICON */}
+          <IconButton onClick={() => setCartOpen(true)}>
+            <ShoppingBagOutlinedIcon />
           </IconButton>
         </Toolbar>
       </AppBar>
 
-      {/* DRAWER */}
+      {/* CATEGORY DRAWER (LEFT) */}
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
         <Box sx={{ width: 280, py: 2 }}>
-          <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-            <Box component="img" src={logoUrl} sx={{ height: 60 }} />
-          </Box>
-
           <List>
             <RenderCategories
               items={categories}
@@ -297,19 +288,24 @@ export default function EtsyStyleHeader() {
               onClick={handleCategoryClick}
             />
           </List>
+        </Box>
+      </Drawer>
 
-          <Divider />
+      {/* 🛒 CART DRAWER (RIGHT) */}
+      <Drawer
+        anchor="right"
+        open={cartOpen}
+        onClose={() => setCartOpen(false)}
+      >
+        <Box sx={{ width: 320, p: 2 }}>
+          <Typography fontSize={18} fontWeight={600} sx={{fontFamily: '"Montserrat", sans-serif'}}>
+            Your Bag
+          </Typography>
 
-          <Typography
-            sx={{
-              px: 2,
-              py: 1.5,
-              color: "#777",
-              fontSize: 14,
-              fontFamily: '"Montserrat", sans-serif',
-            }}
-          >
-            Selected: {selectedCategory}
+          <Divider sx={{ my: 2 }} />
+
+          <Typography color="#777" sx={{fontFamily: '"Montserrat", sans-serif'}}>
+            Your cart is empty
           </Typography>
         </Box>
       </Drawer>
