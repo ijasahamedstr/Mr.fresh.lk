@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
 import axios from "axios";
 import {
   Box,
@@ -44,16 +43,8 @@ const formatPriceToLKR = (price?: number | string) => {
 };
 
 /* ================= CARD ================= */
-const ProductCard: React.FC<{
-  product: SpecialProduct;
-}> = ({ product }) => {
+const ProductCard: React.FC<{ product: SpecialProduct }> = ({ product }) => {
   const navigate = useNavigate();
-
-  const handleViewProduct = () => {
-    navigate(`/product/${product.id}`, {
-      state: { product },
-    });
-  };
 
   return (
     <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
@@ -70,15 +61,25 @@ const ProductCard: React.FC<{
       />
 
       <CardContent>
-        <Typography fontWeight={600} noWrap sx={{ fontFamily: Montserrat }}>
+        <Typography
+          fontWeight={600}
+          noWrap
+          sx={{
+            fontFamily: Montserrat,
+            color: "#17202A",
+          }}
+        >
           {product.title}
         </Typography>
 
         {product.weight && (
           <Typography
             fontSize={12}
-            color="text.secondary"
-            sx={{ fontFamily: Montserrat }}
+            sx={{
+              fontFamily: Montserrat,
+              color: "#17202A",
+              opacity: 0.7,
+            }}
           >
             {product.weight}
           </Typography>
@@ -86,9 +87,11 @@ const ProductCard: React.FC<{
 
         <Typography
           fontWeight={700}
-          color="error.main"
           mt={1}
-          sx={{ fontFamily: Montserrat }}
+          sx={{
+            fontFamily: Montserrat,
+            color: "#17202A",
+          }}
         >
           {formatPriceToLKR(product.price)}
         </Typography>
@@ -106,7 +109,9 @@ const ProductCard: React.FC<{
             fontWeight: 600,
             fontFamily: Montserrat,
           }}
-          onClick={handleViewProduct}
+          onClick={() =>
+            navigate(`/product/${product.id}`, { state: { product } })
+          }
         >
           View The Product
         </Button>
@@ -125,48 +130,36 @@ const Product: React.FC<ProductProps> = ({
   const [allProducts, setAllProducts] = useState<SpecialProduct[]>([]);
   const [visibleCount, setVisibleCount] = useState(pageSize);
 
-  /* ================= FETCH DATA ================= */
   useEffect(() => {
     const fetchProducts = async () => {
-      try {
-        const res = await axios.get(`${API_HOST}/Products`);
-        const products = res.data || [];
+      const res = await axios.get(`${API_HOST}/Products`);
+      const products = res.data || [];
 
-        const mapped: SpecialProduct[] = products.map((p: any) => ({
-          id: p._id,
-          title: p.name,
-          price: p.price,
-          weight: p.weight ? `${p.weight} g` : undefined,
-          img: p.images?.[0],
-          todaySpecial: p.todaySpecial,
-          popularProduct: p.popularProduct,
-          createdAt: p.createdAt,
-        }));
+      const mapped = products.map((p: any) => ({
+        id: p._id,
+        title: p.name,
+        price: p.price,
+        weight: p.weight ? `${p.weight} g` : undefined,
+        img: p.images?.[0],
+        todaySpecial: p.todaySpecial,
+        popularProduct: p.popularProduct,
+        createdAt: p.createdAt,
+      }));
 
-        setTodaySpecials(mapped.filter((p) => p.todaySpecial));
-        setPopularProducts(mapped.filter((p) => p.popularProduct));
-
-        setAllProducts(
-          mapped.sort(
-            (a, b) =>
-              new Date(b.createdAt || "").getTime() -
-              new Date(a.createdAt || "").getTime()
-          )
-        );
-      } catch (err) {
-        console.error("Product fetch error", err);
-      }
+      setTodaySpecials(mapped.filter((p: any) => p.todaySpecial));
+      setPopularProducts(mapped.filter((p: any) => p.popularProduct));
+      setAllProducts(
+        mapped.sort(
+          (a: any, b: any) =>
+            new Date(b.createdAt || "").getTime() -
+            new Date(a.createdAt || "").getTime()
+        )
+      );
     };
 
     fetchProducts();
   }, []);
 
-  const loadMore = () =>
-    setVisibleCount((v) => Math.min(allProducts.length, v + pageSize));
-
-  const canLoadMore = visibleCount < allProducts.length;
-
-  /* ================= SLIDER ================= */
   const specialRef = useRef<HTMLDivElement>(null);
   const popularRef = useRef<HTMLDivElement>(null);
 
@@ -178,33 +171,27 @@ const Product: React.FC<ProductProps> = ({
     });
   };
 
-  /* ================= UI ================= */
   return (
     <Box px={{ xs: 2, md: 3 }} sx={{ fontFamily: Montserrat }}>
-      {/* TODAY SPECIAL */}
       <Section
         title="Today Special Offer"
-        titleColor="#17202A"
         products={todaySpecials.slice(0, cardsCount)}
         refEl={specialRef}
         scroll={scrollByOne}
       />
 
-      {/* POPULAR */}
       <Section
         title="Popular Products"
-        titleColor="#17202A"
         products={popularProducts.slice(0, cardsCount)}
         refEl={popularRef}
         scroll={scrollByOne}
       />
 
-      {/* ALL PRODUCTS */}
       <Typography
         fontSize={22}
         fontWeight={800}
         mb={2}
-        sx={{ fontFamily: Montserrat ,color:"#17202A"}}
+        sx={{ fontFamily: Montserrat, color: "#17202A" }}
       >
         All Products
       </Typography>
@@ -224,12 +211,19 @@ const Product: React.FC<ProductProps> = ({
         ))}
       </Box>
 
-      {canLoadMore && (
+      {visibleCount < allProducts.length && (
         <Box textAlign="center" mt={3}>
           <Button
             variant="contained"
-            sx={{ fontWeight: 600, textTransform: "none", fontFamily: Montserrat }}
-            onClick={loadMore}
+            sx={{
+              fontWeight: 600,
+              textTransform: "none",
+              fontFamily: Montserrat,
+              color: "#17202A",
+            }}
+            onClick={() =>
+              setVisibleCount((v) => Math.min(allProducts.length, v + pageSize))
+            }
           >
             Load More
           </Button>
@@ -240,24 +234,23 @@ const Product: React.FC<ProductProps> = ({
 };
 
 /* ================= SECTION ================= */
-const Section = ({
-  title,
-  products,
-  refEl,
-  scroll,
-}: any) => (
+const Section = ({ title, products, refEl, scroll }: any) => (
   <>
     <Box display="flex" justifyContent="space-between" mb={1}>
-      <Typography fontSize={22} fontWeight={800}>
+      <Typography
+        fontSize={22}
+        fontWeight={800}
+        sx={{ fontFamily: Montserrat, color: "#17202A" }}
+      >
         {title}
       </Typography>
 
       <Box>
-        <IconButton onClick={() => scroll(refEl.current, "prev")}>
-          <ChevronLeftIcon />
+        <IconButton>
+          <ChevronLeftIcon sx={{ color: "#17202A" }} />
         </IconButton>
-        <IconButton onClick={() => scroll(refEl.current, "next")}>
-          <ChevronRightIcon />
+        <IconButton>
+          <ChevronRightIcon sx={{ color: "#17202A" }} />
         </IconButton>
       </Box>
     </Box>
@@ -265,7 +258,7 @@ const Section = ({
     <Box ref={refEl} display="flex" gap={2} overflow="auto" mb={4}>
       {products.map((p: any) => (
         <Box minWidth={260} key={p.id}>
-          <ProductCard product={p}  />
+          <ProductCard product={p} />
         </Box>
       ))}
     </Box>
