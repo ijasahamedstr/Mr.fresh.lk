@@ -37,7 +37,6 @@ export type SpecialProduct = {
 type ProductProps = {
   cardsCount?: number;
   pageSize?: number;
-  onAddToBag?: (product: SpecialProduct) => void;
 };
 
 /* ================= PRICE FORMAT ================= */
@@ -49,8 +48,7 @@ const formatPriceToLKR = (price?: number | string) => {
 /* ================= CARD ================= */
 const ProductCard: React.FC<{
   product: SpecialProduct;
-  onAddToBag?: (product: SpecialProduct) => void;
-}> = ({ product, onAddToBag }) => {
+}> = ({ product }) => {
   const navigate = useNavigate();
 
   const handleViewProduct = () => {
@@ -123,11 +121,7 @@ const ProductCard: React.FC<{
 const Product: React.FC<ProductProps> = ({
   cardsCount = 5,
   pageSize = 12,
-  onAddToBag,
 }) => {
-  const theme = useTheme();
-  const isSm = useMediaQuery(theme.breakpoints.up("sm"));
-
   const [todaySpecials, setTodaySpecials] = useState<SpecialProduct[]>([]);
   const [popularProducts, setPopularProducts] = useState<SpecialProduct[]>([]);
   const [allProducts, setAllProducts] = useState<SpecialProduct[]>([]);
@@ -195,7 +189,6 @@ const Product: React.FC<ProductProps> = ({
         products={todaySpecials.slice(0, cardsCount)}
         refEl={specialRef}
         scroll={scrollByOne}
-        onAddToBag={onAddToBag}
       />
 
       {/* POPULAR */}
@@ -204,7 +197,6 @@ const Product: React.FC<ProductProps> = ({
         products={popularProducts.slice(0, cardsCount)}
         refEl={popularRef}
         scroll={scrollByOne}
-        onAddToBag={onAddToBag}
       />
 
       {/* ALL PRODUCTS */}
@@ -228,7 +220,7 @@ const Product: React.FC<ProductProps> = ({
         gap={3}
       >
         {allProducts.slice(0, visibleCount).map((p) => (
-          <ProductCard key={p.id} product={p} onAddToBag={onAddToBag} />
+          <ProductCard key={p.id} product={p} />
         ))}
       </Box>
 
@@ -253,7 +245,6 @@ const Section = ({
   products,
   refEl,
   scroll,
-  onAddToBag,
 }: any) => (
   <>
     <Box display="flex" justifyContent="space-between" mb={1}>
@@ -274,7 +265,7 @@ const Section = ({
     <Box ref={refEl} display="flex" gap={2} overflow="auto" mb={4}>
       {products.map((p: any) => (
         <Box minWidth={260} key={p.id}>
-          <ProductCard product={p} onAddToBag={onAddToBag} />
+          <ProductCard product={p}  />
         </Box>
       ))}
     </Box>
