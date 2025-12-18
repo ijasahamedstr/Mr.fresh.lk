@@ -27,17 +27,15 @@ type CategorySection = {
   categories: CategoryNode[];
 };
 
-/* ---------------- REVERSE (LIFO) HELPER ---------------- */
+/* ---------------- LIFO HELPER ---------------- */
 
-const reverseCategories = (items: CategoryNode[]): CategoryNode[] => {
+const lifoCategories = (items: CategoryNode[]): CategoryNode[] => {
   return items
     .slice()
     .reverse()
     .map((item) => ({
       ...item,
-      children: item.children
-        ? reverseCategories(item.children)
-        : undefined,
+      children: item.children ? lifoCategories(item.children) : item.children,
     }));
 };
 
@@ -52,7 +50,7 @@ const MainHome: React.FC = () => {
   const [openCategory, setOpenCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  /* ---------------- FETCH API CATEGORIES ---------------- */
+  /* ---------------- FETCH API ---------------- */
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -69,12 +67,12 @@ const MainHome: React.FC = () => {
           });
         }
 
-        const reversed = reverseCategories(all);
-        setCategories(reversed);
+        const lifoData = lifoCategories(all);
 
-        if (reversed.length) {
-          setSelectedCategory(reversed[0].title);
-          setOpenCategory(reversed[0].id);
+        setCategories(lifoData);
+        if (lifoData.length) {
+          setSelectedCategory(lifoData[0].title);
+          setOpenCategory(lifoData[0].id);
         }
       } catch (error) {
         console.error("Category load failed", error);
@@ -108,15 +106,17 @@ const MainHome: React.FC = () => {
     >
       {/* MOBILE TOP BAR */}
       {!isDesktop && (
-        <AppBar position="static" color="transparent" elevation={0}>
+        <AppBar
+          position="static"
+          color="transparent"
+          elevation={0}
+          sx={{ flexShrink: 0, fontFamily: '"Montserrat", sans-serif' }}
+        >
           <Toolbar sx={{ px: 0 }}>
             <Typography
               fontWeight={600}
               fontSize={18}
-              sx={{
-                fontFamily: '"Montserrat", sans-serif',
-                color: "#17202A",
-              }}
+              sx={{ fontFamily: '"Montserrat", sans-serif' }}
             >
               Shop
             </Typography>
@@ -136,16 +136,14 @@ const MainHome: React.FC = () => {
             p: 2,
             overflowY: "auto",
             flexShrink: 0,
+            fontFamily: '"Montserrat", sans-serif',
           }}
         >
           <Typography
             fontWeight={600}
             fontSize={18}
             mb={1.5}
-            sx={{
-              fontFamily: '"Montserrat", sans-serif',
-              color: "#17202A",
-            }}
+            sx={{ fontFamily: '"Montserrat", sans-serif' }}
           >
             Categories
           </Typography>
@@ -171,15 +169,10 @@ const MainHome: React.FC = () => {
                           ? "#f5f7ff"
                           : "transparent",
                       "&:hover": { background: "#f5f5f5" },
+                      fontFamily: '"Montserrat", sans-serif',
                     }}
                   >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1.5,
-                      }}
-                    >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                       {cat.icon && (
                         <Box
                           component="img"
@@ -196,10 +189,7 @@ const MainHome: React.FC = () => {
                       <Typography
                         fontSize={16}
                         fontWeight={500}
-                        sx={{
-                          fontFamily: '"Montserrat", sans-serif',
-                          color: "#17202A",
-                        }}
+                        sx={{ fontFamily: '"Montserrat", sans-serif' }}
                       >
                         {cat.title}
                       </Typography>
@@ -209,11 +199,9 @@ const MainHome: React.FC = () => {
                       sx={{
                         fontSize: 20,
                         opacity: 0.4,
-                        transform: isOpen
-                          ? "rotate(90deg)"
-                          : "rotate(0deg)",
+                        transform: isOpen ? "rotate(90deg)" : "rotate(0deg)",
                         transition: "transform 0.2s",
-                        color: "#17202A",
+                        fontFamily: '"Montserrat", sans-serif',
                       }}
                     >
                       ›
@@ -234,6 +222,7 @@ const MainHome: React.FC = () => {
                           borderRadius: 1,
                           cursor: "pointer",
                           "&:hover": { background: "#f5f5f5" },
+                          fontFamily: '"Montserrat", sans-serif',
                         }}
                       >
                         {sub.icon && (
@@ -251,10 +240,7 @@ const MainHome: React.FC = () => {
                         )}
                         <Typography
                           fontSize={14}
-                          sx={{
-                            fontFamily: '"Montserrat", sans-serif',
-                            color: "#17202A",
-                          }}
+                          sx={{ fontFamily: '"Montserrat", sans-serif' }}
                         >
                           {sub.title}
                         </Typography>
@@ -274,6 +260,7 @@ const MainHome: React.FC = () => {
           flexDirection: "column",
           gap: 2,
           overflowY: "auto",
+          fontFamily: '"Montserrat", sans-serif',
         }}
       >
         <Box
@@ -283,6 +270,7 @@ const MainHome: React.FC = () => {
             overflow: "hidden",
             background: "#fff",
             boxShadow: "0 6px 18px rgba(0,0,0,0.06)",
+            flexShrink: 0,
           }}
         >
           <Banner />
@@ -291,12 +279,19 @@ const MainHome: React.FC = () => {
         {!isDesktop && !loading && (
           <Box
             sx={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: 2,
+              display: "flex",
+              gap: 4,
+              overflowX: "auto",
+              whiteSpace: "nowrap",
               background: "#fff",
               borderRadius: 2,
               p: 2,
+              flexShrink: 0,
+              scrollBehavior: "smooth",
+              "&::-webkit-scrollbar": { display: "none" },
+              msOverflowStyle: "none",
+              scrollbarWidth: "none",
+              fontFamily: '"Montserrat", sans-serif',
             }}
           >
             {categories.map((cat) => (
@@ -304,10 +299,13 @@ const MainHome: React.FC = () => {
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.title)}
                 sx={{
+                  minWidth: 90, // 👈 controls card width
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
+                  textAlign: "center",
                   cursor: "pointer",
+                  fontFamily: '"Montserrat", sans-serif',
                 }}
               >
                 {cat.icon && (
@@ -319,17 +317,17 @@ const MainHome: React.FC = () => {
                       height: 56,
                       borderRadius: "50%",
                       background: "#f4f6f8",
-                      padding: "8px",
+                      p: "8px",
                       mb: 1,
                     }}
                   />
                 )}
+
                 <Typography
-                  fontSize={14}
-                  fontWeight={500}
                   sx={{
+                    fontSize: 12,
+                    fontWeight: 500,
                     fontFamily: '"Montserrat", sans-serif',
-                    color: "#17202A",
                   }}
                 >
                   {cat.title}
@@ -339,12 +337,14 @@ const MainHome: React.FC = () => {
           </Box>
         )}
 
+
         <Box
           sx={{
             flex: 1,
             p: 2,
             borderRadius: 2,
             background: "#fff",
+            fontFamily: '"Montserrat", sans-serif',
           }}
         >
           <Product />
