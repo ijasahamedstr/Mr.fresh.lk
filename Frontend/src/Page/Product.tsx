@@ -10,8 +10,6 @@ import {
   CardContent,
   CardActions,
   CardMedia,
-  useTheme,
-  useMediaQuery,
   IconButton,
 } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
