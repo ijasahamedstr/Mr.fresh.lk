@@ -69,6 +69,18 @@ type CategorySection = {
   categories: CategoryNode[];
 };
 
+/* ---------------- LIFO HELPER ---------------- */
+
+const reverseCategories = (items: CategoryNode[]): CategoryNode[] => {
+  return items
+    .slice()
+    .reverse()
+    .map((item) => ({
+      ...item,
+      children: item.children ? reverseCategories(item.children) : undefined,
+    }));
+};
+
 /* ---------------- RECURSIVE CATEGORY ---------------- */
 
 const RenderCategories = ({
@@ -125,9 +137,8 @@ const RenderCategories = ({
                 }}
               />
 
-              {cat.children && (
-                isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />
-              )}
+              {cat.children &&
+                (isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />)}
             </ListItemButton>
           </ListItem>
 
@@ -163,7 +174,7 @@ export default function EtsyStyleHeader() {
   const logoUrl =
     "https://i.ibb.co/JRPnDfqQ/cmh6a26eo000h04jmaveg5yzp-removebg-preview.png";
 
-  /* ---------------- FETCH CATEGORIES ---------------- */
+  /* ---------------- FETCH CATEGORIES (LIFO) ---------------- */
 
   useEffect(() => {
     if (!API_HOST) return;
@@ -182,11 +193,14 @@ export default function EtsyStyleHeader() {
           });
         }
 
-        setCategories(all);
+        // 🔥 APPLY LIFO
+        const lifoCategories = reverseCategories(all);
 
-        if (all.length) {
-          setSelectedCategory(all[0].title);
-          setOpenCategory(all[0].id);
+        setCategories(lifoCategories);
+
+        if (lifoCategories.length) {
+          setSelectedCategory(lifoCategories[0].title);
+          setOpenCategory(lifoCategories[0].id);
         }
       } catch (err) {
         console.error("Failed to load categories", err);
@@ -241,7 +255,9 @@ export default function EtsyStyleHeader() {
                 }}
               >
                 <MenuIcon fontSize="small" />
-                <Typography fontWeight={600} sx={{fontFamily: '"Montserrat", sans-serif'}}>Categories</Typography>
+                <Typography fontWeight={600} sx={{ fontFamily: '"Montserrat", sans-serif' }}>
+                  Categories
+                </Typography>
               </Box>
             )}
           </Box>
@@ -284,7 +300,15 @@ export default function EtsyStyleHeader() {
 
           <Divider />
 
-          <Typography sx={{ px: 2, py: 1.5, color: "#777", fontSize: 14,fontFamily: '"Montserrat", sans-serif' }}>
+          <Typography
+            sx={{
+              px: 2,
+              py: 1.5,
+              color: "#777",
+              fontSize: 14,
+              fontFamily: '"Montserrat", sans-serif',
+            }}
+          >
             Selected: {selectedCategory}
           </Typography>
         </Box>

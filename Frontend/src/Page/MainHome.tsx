@@ -27,11 +27,24 @@ type CategorySection = {
   categories: CategoryNode[];
 };
 
+/* ---------------- REVERSE (LIFO) HELPER ---------------- */
+
+const reverseCategories = (items: CategoryNode[]): CategoryNode[] => {
+  return items
+    .slice()
+    .reverse()
+    .map((item) => ({
+      ...item,
+      children: item.children
+        ? reverseCategories(item.children)
+        : undefined,
+    }));
+};
+
 /* ---------------- MAIN COMPONENT ---------------- */
 
 const MainHome: React.FC = () => {
   const theme = useTheme();
-  // Using 'sm' breakpoint for a typical tablet/mobile cutoff
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   const [categories, setCategories] = useState<CategoryNode[]>([]);
@@ -56,10 +69,13 @@ const MainHome: React.FC = () => {
           });
         }
 
-        setCategories(all);
-        if (all.length) {
-          setSelectedCategory(all[0].title);
-          setOpenCategory(all[0].id);
+        const reversed = reverseCategories(all);
+
+        setCategories(reversed);
+
+        if (reversed.length) {
+          setSelectedCategory(reversed[0].title);
+          setOpenCategory(reversed[0].id);
         }
       } catch (error) {
         console.error("Category load failed", error);
@@ -73,7 +89,6 @@ const MainHome: React.FC = () => {
 
   const handleCategoryClick = useCallback((cat: CategoryNode) => {
     setSelectedCategory(cat.title);
-    // Toggles the submenu on desktop
     setOpenCategory((prev) => (prev === cat.id ? null : cat.id));
   }, []);
 
@@ -82,9 +97,8 @@ const MainHome: React.FC = () => {
   return (
     <Box
       sx={{
-        // 🚨 CRITICAL FIX 1: Set explicit height and hide overflow
         height: "100vh",
-        overflow: "hidden", 
+        overflow: "hidden",
         display: "flex",
         gap: 2,
         p: 1,
@@ -93,12 +107,14 @@ const MainHome: React.FC = () => {
         fontFamily: '"Montserrat", sans-serif',
       }}
     >
-      {/* MOBILE TOP BAR (Fixed height) */}
+      {/* MOBILE TOP BAR */}
       {!isDesktop && (
-        <AppBar position="static" color="transparent" elevation={0} 
-            // 🚨 Use Toolbar for height calculation
-            sx={{ flexShrink: 0, bgcolor: 'transparent' }} 
-        > 
+        <AppBar
+          position="static"
+          color="transparent"
+          elevation={0}
+          sx={{ flexShrink: 0, bgcolor: "transparent" }}
+        >
           <Toolbar sx={{ px: 0 }}>
             <Typography
               fontWeight={600}
@@ -111,24 +127,21 @@ const MainHome: React.FC = () => {
         </AppBar>
       )}
 
-      {/* LEFT DESKTOP CATEGORY MENU (Fixed width, scrolling content) */}
+      {/* DESKTOP CATEGORY MENU */}
       {isDesktop && (
         <Box
           sx={{
             width: 280,
-            // 🚨 CRITICAL FIX 2: Set height to 100% of the flex container
-            height: '100%', 
+            height: "100%",
             background: "#fff",
             borderRadius: 2,
             boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
             p: 2,
-            // Keep internal scrolling for the category list
-            overflowY: "auto", 
-            flexShrink: 0, // Prevent shrinking
+            overflowY: "auto",
+            flexShrink: 0,
             fontFamily: '"Montserrat", sans-serif',
           }}
         >
-          {/* HEADING (fixed inside the scrolling box) */}
           <Typography
             fontWeight={600}
             fontSize={18}
@@ -143,8 +156,7 @@ const MainHome: React.FC = () => {
               const isOpen = openCategory === cat.id;
 
               return (
-                <Box key={cat.id}>
-                  {/* MAIN CATEGORY */}
+                <Box key={cat.id} sx={{ fontFamily: '"Montserrat", sans-serif' }}>
                   <Box
                     onClick={() => handleCategoryClick(cat)}
                     sx={{
@@ -163,7 +175,14 @@ const MainHome: React.FC = () => {
                       fontFamily: '"Montserrat", sans-serif',
                     }}
                   >
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                        fontFamily: '"Montserrat", sans-serif',
+                      }}
+                    >
                       {cat.icon && (
                         <Box
                           component="img"
@@ -178,11 +197,9 @@ const MainHome: React.FC = () => {
                         />
                       )}
                       <Typography
-                        sx={{
-                          fontSize: 16,
-                          fontWeight: 500,
-                          fontFamily: '"Montserrat", sans-serif',
-                        }}
+                        fontSize={16}
+                        fontWeight={500}
+                        sx={{ fontFamily: '"Montserrat", sans-serif' }}
                       >
                         {cat.title}
                       </Typography>
@@ -192,7 +209,9 @@ const MainHome: React.FC = () => {
                       sx={{
                         fontSize: 20,
                         opacity: 0.4,
-                        transform: isOpen ? "rotate(90deg)" : "rotate(0deg)",
+                        transform: isOpen
+                          ? "rotate(90deg)"
+                          : "rotate(0deg)",
                         transition: "transform 0.2s",
                         fontFamily: '"Montserrat", sans-serif',
                       }}
@@ -201,7 +220,6 @@ const MainHome: React.FC = () => {
                     </Typography>
                   </Box>
 
-                  {/* SUB CATEGORIES */}
                   {isOpen &&
                     cat.children?.map((sub) => (
                       <Box
@@ -233,10 +251,8 @@ const MainHome: React.FC = () => {
                           />
                         )}
                         <Typography
-                          sx={{
-                            fontSize: 14,
-                            fontFamily: '"Montserrat", sans-serif',
-                          }}
+                          fontSize={14}
+                          sx={{ fontFamily: '"Montserrat", sans-serif' }}
                         >
                           {sub.title}
                         </Typography>
@@ -248,19 +264,18 @@ const MainHome: React.FC = () => {
         </Box>
       )}
 
-      {/* RIGHT MAIN AREA (Scrollable content area) */}
+      {/* RIGHT MAIN AREA */}
       <Box
         sx={{
           flex: 1,
           display: "flex",
           flexDirection: "column",
           gap: 2,
-          // 🚨 CRITICAL FIX 3: Make this the main scrollable content area
-          height: isDesktop ? '100%' : undefined, // Desktop gets height 100% of parent
-          overflowY: isDesktop ? 'auto' : 'auto', // Scroll for main content
+          height: isDesktop ? "100%" : undefined,
+          overflowY: "auto",
+          fontFamily: '"Montserrat", sans-serif',
         }}
       >
-        {/* BANNER (Fixed height/size) */}
         <Box
           sx={{
             height: isDesktop ? 220 : 170,
@@ -268,14 +283,12 @@ const MainHome: React.FC = () => {
             overflow: "hidden",
             background: "#fff",
             boxShadow: "0 6px 18px rgba(0,0,0,0.06)",
-            // Ensure this doesn't shrink/grow unexpectedly
-            flexShrink: 0, 
+            flexShrink: 0,
           }}
         >
           <Banner />
         </Box>
 
-        {/* MOBILE CATEGORY GRID (Fixed height/size) */}
         {!isDesktop && !loading && (
           <Box
             sx={{
@@ -285,7 +298,7 @@ const MainHome: React.FC = () => {
               background: "#fff",
               borderRadius: 2,
               p: 2,
-              flexShrink: 0, // Ensure this doesn't shrink
+              flexShrink: 0,
               fontFamily: '"Montserrat", sans-serif',
             }}
           >
@@ -317,11 +330,9 @@ const MainHome: React.FC = () => {
                   />
                 )}
                 <Typography
-                  sx={{
-                    fontSize: 14,
-                    fontWeight: 500,
-                    fontFamily: '"Montserrat", sans-serif',
-                  }}
+                  fontSize={14}
+                  fontWeight={500}
+                  sx={{ fontFamily: '"Montserrat", sans-serif' }}
                 >
                   {cat.title}
                 </Typography>
@@ -330,20 +341,16 @@ const MainHome: React.FC = () => {
           </Box>
         )}
 
-        {/* PRODUCTS (Takes up remaining space and scrolls) */}
-        <Box 
-            sx={{ 
-                flex: 1, 
-                p: 2, 
-                borderRadius: 2, 
-                background: "#fff", // Added background for visual separation
-                // 🚨 Removed overflowY: "auto" from here, as the parent (RIGHT MAIN AREA) now manages the scrolling for the whole content section. 
-                // However, in this specific case, keeping the internal scrolling helps isolate the Product component if it has complex content. 
-                // Let's keep it simple: the parent `Box` handles the scroll.
-            }}
+        <Box
+          sx={{
+            flex: 1,
+            p: 2,
+            borderRadius: 2,
+            background: "#fff",
+            fontFamily: '"Montserrat", sans-serif',
+          }}
         >
-          {/* We wrap Product in a Box that takes the remaining space */}
-          <Product /> 
+          <Product />
         </Box>
       </Box>
     </Box>
