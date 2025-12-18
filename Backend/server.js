@@ -22,7 +22,7 @@ app.use(
   cors({
     origin: [
       "https://mr-fresh-lk.vercel.app",
-      "https://mr-fresh-lk-admin.vercel.app",
+      "https://mr-fresh-lk-server.vercel.app",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,

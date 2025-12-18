@@ -1,268 +1,313 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   Box,
   Typography,
-  Button,
   Card,
-  CardContent,
-  CardActions,
   CardMedia,
+  CardContent,
+  Button,
   IconButton,
+  Container,
+  Stack,
+  Skeleton,
 } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-
-const Montserrat = '"Montserrat", sans-serif';
+import { keyframes } from "@mui/system";
 
 /* ================= ENV ================= */
 const API_HOST = import.meta.env.VITE_API_HOST;
+const Montserrat = '"Montserrat", sans-serif';
 
-/* ================= TYPES ================= */
-export type SpecialProduct = {
-  id?: string;
-  title?: string;
-  price?: number | string;
-  img?: string;
-  weight?: string;
-  todaySpecial?: boolean;
-  popularProduct?: boolean;
-  createdAt?: string;
-};
+/* ================= ANIMATION ================= */
+const blink = keyframes`
+  0% { box-shadow: 0 0 0 rgba(211,47,47,0.4); }
+  50% { box-shadow: 0 0 20px rgba(211,47,47,0.9); }
+  100% { box-shadow: 0 0 0 rgba(211,47,47,0.4); }
+`;
 
-type ProductProps = {
-  cardsCount?: number;
-  pageSize?: number;
-};
-
-/* ================= PRICE FORMAT ================= */
-const formatPriceToLKR = (price?: number | string) => {
-  if (!price) return "";
-  return `LKR ${Number(price).toFixed(2)}`;
-};
-
-/* ================= CARD ================= */
-const ProductCard: React.FC<{ product: SpecialProduct }> = ({ product }) => {
+const Products: React.FC = () => {
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  return (
-    <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
-      <CardMedia
-        component="img"
-        height={140}
-        image={product.img}
-        alt={product.title}
-        onError={(e: any) =>
-          (e.currentTarget.src =
-            "https://via.placeholder.com/600x400?text=No+Image")
-        }
-        sx={{ objectFit: "contain", background: "#fff" }}
-      />
-
-      <CardContent>
-        <Typography
-          fontWeight={600}
-          noWrap
-          sx={{
-            fontFamily: Montserrat,
-            color: "#17202A",
-          }}
-        >
-          {product.title}
-        </Typography>
-
-        {product.weight && (
-          <Typography
-            fontSize={12}
-            sx={{
-              fontFamily: Montserrat,
-              color: "#17202A",
-              opacity: 0.7,
-            }}
-          >
-            {product.weight}
-          </Typography>
-        )}
-
-        <Typography
-          fontWeight={700}
-          mt={1}
-          sx={{
-            fontFamily: Montserrat,
-            color: "#17202A",
-          }}
-        >
-          {formatPriceToLKR(product.price)}
-        </Typography>
-      </CardContent>
-
-      <CardActions>
-        <Button
-          fullWidth
-          variant="contained"
-          sx={{
-            background: "linear-gradient(90deg,#c2d142,#9eb027)",
-            color: "#000",
-            borderRadius: 3,
-            textTransform: "none",
-            fontWeight: 600,
-            fontFamily: Montserrat,
-          }}
-          onClick={() =>
-            navigate(`/product/${product.id}`, { state: { product } })
-          }
-        >
-          View The Product
-        </Button>
-      </CardActions>
-    </Card>
-  );
-};
-
-/* ================= MAIN ================= */
-const Product: React.FC<ProductProps> = ({
-  cardsCount = 5,
-  pageSize = 12,
-}) => {
-  const [todaySpecials, setTodaySpecials] = useState<SpecialProduct[]>([]);
-  const [popularProducts, setPopularProducts] = useState<SpecialProduct[]>([]);
-  const [allProducts, setAllProducts] = useState<SpecialProduct[]>([]);
-  const [visibleCount, setVisibleCount] = useState(pageSize);
-
   useEffect(() => {
-    const fetchProducts = async () => {
-      const res = await axios.get(`${API_HOST}/Products`);
-      const products = res.data || [];
-
-      const mapped = products.map((p: any) => ({
-        id: p._id,
-        title: p.name,
-        price: p.price,
-        weight: p.weight ? `${p.weight} g` : undefined,
-        img: p.images?.[0],
-        todaySpecial: p.todaySpecial,
-        popularProduct: p.popularProduct,
-        createdAt: p.createdAt,
-      }));
-
-      setTodaySpecials(mapped.filter((p: any) => p.todaySpecial));
-      setPopularProducts(mapped.filter((p: any) => p.popularProduct));
-      setAllProducts(
-        mapped.sort(
-          (a: any, b: any) =>
-            new Date(b.createdAt || "").getTime() -
-            new Date(a.createdAt || "").getTime()
-        )
-      );
-    };
-
-    fetchProducts();
+    axios
+      .get(`${API_HOST}/Products`)
+      .then((res) => setItems(res.data))
+      .catch((err) => console.error("Error loading products", err))
+      .finally(() => setLoading(false));
   }, []);
 
-  const specialRef = useRef<HTMLDivElement>(null);
-  const popularRef = useRef<HTMLDivElement>(null);
+  const todaySpecials = items.filter((p) => p.todaySpecial);
+  const popularProducts = items.filter((p) => p.popularProduct);
 
-  const scrollByOne = (ref: HTMLDivElement | null, dir: "next" | "prev") => {
-    if (!ref) return;
-    ref.scrollBy({
-      left: dir === "next" ? ref.clientWidth : -ref.clientWidth,
-      behavior: "smooth",
+  const handleProductClick = (product: any) => {
+    navigate(`/product/${product.id || product._id}`, {
+      state: { product },
     });
   };
 
+  if (loading) {
+    return (
+      <Container
+        maxWidth="xl"
+        sx={{
+          py: 8,
+          fontFamily: Montserrat,
+          "& *": { fontFamily: Montserrat },
+        }}
+      >
+        <Skeleton variant="text" width={200} height={40} sx={{ mb: 2 }} />
+        <Stack direction="row" spacing={2}>
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton
+              key={i}
+              variant="rectangular"
+              width={280}
+              height={350}
+              sx={{ borderRadius: 3 }}
+            />
+          ))}
+        </Stack>
+      </Container>
+    );
+  }
+
   return (
-    <Box px={{ xs: 2, md: 3 }} sx={{ fontFamily: Montserrat }}>
-      <Section
-        title="Today Special Offer"
-        products={todaySpecials.slice(0, cardsCount)}
-        refEl={specialRef}
-        scroll={scrollByOne}
-      />
+    <Container
+      maxWidth="xl"
+      sx={{
+        py: 4,
+        fontFamily: Montserrat,
+        "& *": { fontFamily: Montserrat },
+      }}
+    >
+      {/* ================= TODAY SPECIAL ================= */}
+      <SectionHeader title="Today Special Offer" />
+      <HorizontalScrollBox>
+        {todaySpecials.map((item) => (
+          <ProductCard
+            key={item.id}
+            item={item}
+            variant="today"
+            onClick={() => handleProductClick(item)}
+          />
+        ))}
+      </HorizontalScrollBox>
 
-      <Section
-        title="Popular Products"
-        products={popularProducts.slice(0, cardsCount)}
-        refEl={popularRef}
-        scroll={scrollByOne}
-      />
+      {/* ================= POPULAR PRODUCTS ================= */}
+      <SectionHeader title="Popular Products" />
+      <HorizontalScrollBox>
+        {popularProducts.map((item) => (
+          <ProductCard
+            key={item.id}
+            item={item}
+            variant="popular"
+            onClick={() => handleProductClick(item)}
+          />
+        ))}
+      </HorizontalScrollBox>
 
+      {/* ================= ALL PRODUCTS ================= */}
       <Typography
-        fontSize={22}
+        variant="h5"
         fontWeight={800}
-        mb={2}
-        sx={{ fontFamily: Montserrat, color: "#17202A" }}
+        sx={{ mt: 4, mb: 3, fontFamily: Montserrat }}
       >
         All Products
       </Typography>
 
       <Box
         display="grid"
-        gridTemplateColumns={{
-          xs: "repeat(1,1fr)",
-          sm: "repeat(2,1fr)",
-          md: "repeat(3,1fr)",
-          lg: "repeat(5,1fr)",
-        }}
         gap={3}
+        gridTemplateColumns={{
+          xs: "repeat(1, 1fr)",
+          sm: "repeat(2, 1fr)",
+          md: "repeat(3, 1fr)",
+          lg: "repeat(5, 1fr)",
+        }}
       >
-        {allProducts.slice(0, visibleCount).map((p) => (
-          <ProductCard key={p.id} product={p} />
+        {items.map((item) => (
+          <ProductCard
+            key={item.id}
+            item={item}
+            onClick={() => handleProductClick(item)}
+          />
         ))}
       </Box>
-
-      {visibleCount < allProducts.length && (
-        <Box textAlign="center" mt={3}>
-          <Button
-            variant="contained"
-            sx={{
-              fontWeight: 600,
-              textTransform: "none",
-              fontFamily: Montserrat,
-              color: "#17202A",
-            }}
-            onClick={() =>
-              setVisibleCount((v) => Math.min(allProducts.length, v + pageSize))
-            }
-          >
-            Load More
-          </Button>
-        </Box>
-      )}
-    </Box>
+    </Container>
   );
 };
 
-/* ================= SECTION ================= */
-const Section = ({ title, products, refEl }: any) => (
-  <>
-    <Box display="flex" justifyContent="space-between" mb={1}>
-      <Typography
-        fontSize={22}
-        fontWeight={800}
-        sx={{ fontFamily: Montserrat, color: "#17202A" }}
-      >
-        {title}
-      </Typography>
+/* ================= SUB COMPONENTS ================= */
 
-      <Box>
-        <IconButton>
-          <ChevronLeftIcon sx={{ color: "#17202A" }} />
-        </IconButton>
-        <IconButton>
-          <ChevronRightIcon sx={{ color: "#17202A" }} />
-        </IconButton>
-      </Box>
+const SectionHeader = ({ title }: { title: string }) => (
+  <Box
+    display="flex"
+    justifyContent="space-between"
+    alignItems="center"
+    mt={4}
+    mb={2}
+    sx={{ fontFamily: Montserrat }}
+  >
+    <Typography variant="h5" fontWeight={800} sx={{ fontFamily: Montserrat }}>
+      {title}
+    </Typography>
+    <Box>
+      <IconButton size="small" sx={{ fontFamily: Montserrat }}>
+        <ChevronLeftIcon />
+      </IconButton>
+      <IconButton size="small" sx={{ fontFamily: Montserrat }}>
+        <ChevronRightIcon />
+      </IconButton>
     </Box>
-
-    <Box ref={refEl} display="flex" gap={2} overflow="auto" mb={4}>
-      {products.map((p: any) => (
-        <Box minWidth={260} key={p.id}>
-          <ProductCard product={p} />
-        </Box>
-      ))}
-    </Box>
-  </>
+  </Box>
 );
 
-export default Product;
+const HorizontalScrollBox = ({ children }: { children: React.ReactNode }) => (
+  <Box
+    sx={{
+      display: "flex",
+      gap: 3,
+      overflowX: "auto",
+      pb: 2,
+      fontFamily: Montserrat,
+      "& *": { fontFamily: Montserrat },
+      "&::-webkit-scrollbar": { display: "none" },
+      scrollbarWidth: "none",
+    }}
+  >
+    {children}
+  </Box>
+);
+
+/* ================= PRODUCT CARD ================= */
+
+const ProductCard = ({
+  item,
+  onClick,
+  variant = "normal",
+}: {
+  item: any;
+  onClick: () => void;
+  variant?: "today" | "popular" | "normal";
+}) => {
+  const isToday = variant === "today";
+  const isPopular = variant === "popular";
+
+  return (
+    <Card
+      elevation={0}
+      sx={{
+        minWidth: 260,
+        maxWidth: 280,
+        borderRadius: 4,
+        position: "relative",
+        border: "1px solid #eee",
+        transition: "0.3s",
+        fontFamily: Montserrat,
+        "& *": { fontFamily: Montserrat },
+
+        ...(isToday && {
+          border: "2px solid #d32f2f",
+          animation: `${blink} 1.4s infinite`,
+        }),
+        ...(isPopular && {
+          border: "2px solid #c2d142",
+        }),
+
+        "&:hover": {
+          transform: "translateY(-6px)",
+          boxShadow: "0 12px 28px rgba(0,0,0,0.12)",
+        },
+      }}
+    >
+      {/* TODAY OFFER BADGE */}
+      {isToday && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: 12,
+            left: 12,
+            bgcolor: "#d32f2f",
+            color: "#fff",
+            px: 1.5,
+            py: 0.5,
+            fontSize: 12,
+            fontWeight: 800,
+            borderRadius: 1,
+            zIndex: 2,
+            fontFamily: Montserrat,
+          }}
+        >
+          TODAY OFFER
+        </Box>
+      )}
+
+      <Box
+        sx={{
+          p: 2,
+          display: "flex",
+          justifyContent: "center",
+          fontFamily: Montserrat,
+        }}
+      >
+        <CardMedia
+          component="img"
+          height="180"
+          image={item.images?.[0] || item.img}
+          alt={item.name}
+          sx={{ objectFit: "contain" }}
+        />
+      </Box>
+
+      <CardContent sx={{ pt: 0, fontFamily: Montserrat }}>
+        <Typography fontWeight={600} fontSize={15} sx={{ fontFamily: Montserrat,}}>
+          {item.name || item.title}
+        </Typography>
+
+        {item.originalPrice && isToday && (
+          <Typography
+            fontSize={12}
+            sx={{ textDecoration: "line-through", color: "#999",fontFamily: Montserrat, }}
+          >
+            LKR {item.originalPrice.toLocaleString()}
+          </Typography>
+        )}
+
+        <Typography
+          fontWeight={500}
+          fontSize={16}
+          color={isToday ? "#d32f2f" : "#000"}
+          sx={{fontFamily: Montserrat,}}
+        >
+          LKR {item.price?.toLocaleString()}
+        </Typography>
+      </CardContent>
+
+      <Box sx={{ p: 2, pt: 0, fontFamily: Montserrat }}>
+        <Button
+          fullWidth
+          onClick={onClick}
+          sx={{
+            bgcolor: "#c2d142",
+            color: "#000",
+            textTransform: "none",
+            fontWeight: 500,
+            borderRadius: 2,
+            fontFamily: Montserrat,
+            boxShadow: "none",
+            "&:hover": { bgcolor: "#adb837" },
+          }}
+        >
+          View The Product
+        </Button>
+      </Box>
+    </Card>
+  );
+};
+
+export default Products;
