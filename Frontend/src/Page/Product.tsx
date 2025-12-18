@@ -234,7 +234,7 @@ const Product: React.FC<ProductProps> = ({
 };
 
 /* ================= SECTION ================= */
-const Section = ({ title, products, refEl, scroll }: any) => (
+const Section = ({ title, products, refEl }: any) => (
   <>
     <Box display="flex" justifyContent="space-between" mb={1}>
       <Typography
