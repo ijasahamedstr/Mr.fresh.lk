@@ -165,8 +165,8 @@ export default function EtsyStyleHeader() {
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const showSearchAndRight = !(isMobile || isTablet);
 
-  const [drawerOpen, setDrawerOpen] = useState(false); // Categories
-  const [cartOpen, setCartOpen] = useState(false); // 🛒 Cart Drawer
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
 
   const [categories, setCategories] = useState<CategoryNode[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -254,7 +254,10 @@ export default function EtsyStyleHeader() {
                 }}
               >
                 <MenuIcon fontSize="small" />
-                <Typography fontWeight={600} sx={{fontFamily: '"Montserrat", sans-serif'}}>
+                <Typography
+                  fontWeight={600}
+                  sx={{ fontFamily: '"Montserrat", sans-serif' }}
+                >
                   Categories
                 </Typography>
               </Box>
@@ -278,33 +281,69 @@ export default function EtsyStyleHeader() {
         </Toolbar>
       </AppBar>
 
-      {/* CATEGORY DRAWER (LEFT) */}
+      {/* CATEGORY DRAWER */}
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
-        <Box sx={{ width: 280, py: 2 }}>
-          <List>
+        <Box
+          sx={{
+            width: 280,
+            py: 2,
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+          }}
+        >
+          {/* ✅ LOGO ADDED */}
+          <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+            <Box component="img" src={logoUrl} sx={{ height: 60 }} />
+          </Box>
+
+          <Divider />
+
+          <List sx={{ flex: 1 }}>
             <RenderCategories
               items={categories}
               openCategory={openCategory}
               onClick={handleCategoryClick}
             />
           </List>
+
+          <Divider />
+
+          <Typography
+            sx={{
+              px: 2,
+              py: 1.5,
+              fontSize: 14,
+              color: "#666",
+              fontFamily: '"Montserrat", sans-serif',
+            }}
+          >
+            Selected Category: <strong>{selectedCategory}</strong>
+          </Typography>
         </Box>
       </Drawer>
 
-      {/* 🛒 CART DRAWER (RIGHT) */}
+      {/* CART DRAWER */}
       <Drawer
         anchor="right"
         open={cartOpen}
         onClose={() => setCartOpen(false)}
       >
         <Box sx={{ width: 320, p: 2 }}>
-          <Typography fontSize={18} fontWeight={600} sx={{fontFamily: '"Montserrat", sans-serif'}}>
+          <Typography
+            fontSize={18}
+            fontWeight={600}
+            sx={{ fontFamily: '"Montserrat", sans-serif' }}
+          >
             Your Bag
           </Typography>
 
           <Divider sx={{ my: 2 }} />
 
-          <Typography color="#777" sx={{fontFamily: '"Montserrat", sans-serif'}}>
+          <Typography
+            color="#777"
+            sx={{ fontFamily: '"Montserrat", sans-serif' }}
+          >
             Your cart is empty
           </Typography>
         </Box>
