@@ -202,7 +202,7 @@ const Product: React.FC<ProductProps> = ({
         fontSize={22}
         fontWeight={800}
         mb={2}
-        sx={{ fontFamily: Montserrat }}
+        sx={{ fontFamily: Montserrat ,color:"#17202A"}}
       >
         All Products
       </Typography>
