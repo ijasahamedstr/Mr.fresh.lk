@@ -184,6 +184,7 @@ const Product: React.FC<ProductProps> = ({
       {/* TODAY SPECIAL */}
       <Section
         title="Today Special Offer"
+        titleColor="#17202A"
         products={todaySpecials.slice(0, cardsCount)}
         refEl={specialRef}
         scroll={scrollByOne}
@@ -192,6 +193,7 @@ const Product: React.FC<ProductProps> = ({
       {/* POPULAR */}
       <Section
         title="Popular Products"
+        titleColor="#17202A"
         products={popularProducts.slice(0, cardsCount)}
         refEl={popularRef}
         scroll={scrollByOne}
