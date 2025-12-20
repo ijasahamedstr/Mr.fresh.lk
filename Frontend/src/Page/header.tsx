@@ -16,8 +16,10 @@ import {
   ListItemText,
   Divider,
   Collapse,
+  Button,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
 
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
@@ -27,9 +29,9 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
 /* ---------------- ENV ---------------- */
 const API_HOST = import.meta.env.VITE_API_HOST as string | undefined;
+const font = '"Montserrat", sans-serif';
 
 /* ---------------- STYLED ---------------- */
-
 const SearchContainer = styled("div")(() => ({
   position: "relative",
   flexGrow: 1,
@@ -46,7 +48,7 @@ const StyledInput = styled(InputBase)(() => ({
   flex: 1,
   padding: "10px 16px",
   fontSize: "1rem",
-  fontFamily: '"Montserrat", sans-serif',
+  fontFamily: font,
 }));
 
 const SearchButton = styled(IconButton)(() => ({
@@ -57,7 +59,6 @@ const SearchButton = styled(IconButton)(() => ({
 }));
 
 /* ---------------- TYPES ---------------- */
-
 type CategoryNode = {
   id: string;
   title: string;
@@ -69,20 +70,27 @@ type CategorySection = {
   categories: CategoryNode[];
 };
 
-/* ---------------- LIFO HELPER ---------------- */
+type CartItem = {
+  productId: string;
+  variantId: string;
+  name: string;
+  variantName: string;
+  price: number;
+  qty: number;
+  image: string;
+};
 
-const reverseCategories = (items: CategoryNode[]): CategoryNode[] => {
-  return items
+/* ---------------- HELPERS ---------------- */
+const reverseCategories = (items: CategoryNode[]): CategoryNode[] =>
+  items
     .slice()
     .reverse()
     .map((item) => ({
       ...item,
       children: item.children ? reverseCategories(item.children) : undefined,
     }));
-};
 
 /* ---------------- RECURSIVE CATEGORY ---------------- */
-
 const RenderCategories = ({
   items,
   level = 0,
@@ -129,7 +137,7 @@ const RenderCategories = ({
                 primary={cat.title}
                 primaryTypographyProps={{
                   sx: {
-                    fontFamily: '"Montserrat", sans-serif',
+                    fontFamily: font,
                     fontSize: level === 0 ? 16 : 14,
                     fontWeight: level === 0 ? 600 : 400,
                   },
@@ -158,67 +166,76 @@ const RenderCategories = ({
 );
 
 /* ---------------- MAIN COMPONENT ---------------- */
-
 export default function EtsyStyleHeader() {
   const theme = useTheme();
+  const navigate = useNavigate();
+
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const showSearchAndRight = !(isMobile || isTablet);
 
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
+  const [categoryDrawer, setCategoryDrawer] = useState(false);
+  const [cartDrawer, setCartDrawer] = useState(false);
 
   const [categories, setCategories] = useState<CategoryNode[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
   const [openCategory, setOpenCategory] = useState<string | null>(null);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   const logoUrl =
     "https://i.ibb.co/JRPnDfqQ/cmh6a26eo000h04jmaveg5yzp-removebg-preview.png";
 
   /* ---------------- FETCH CATEGORIES ---------------- */
-
   useEffect(() => {
     if (!API_HOST) return;
 
-    const fetchCategories = async () => {
-      try {
-        const res = await axios.get(`${API_HOST}/Categorysection`);
+    axios.get(`${API_HOST}/Categorysection`).then((res) => {
+      let all: CategoryNode[] = [];
+      res.data?.forEach((sec: CategorySection) => {
+        if (sec.categories) all = all.concat(sec.categories);
+      });
 
-        let all: CategoryNode[] = [];
-
-        if (Array.isArray(res.data)) {
-          res.data.forEach((section: CategorySection) => {
-            if (Array.isArray(section.categories)) {
-              all = all.concat(section.categories);
-            }
-          });
-        }
-
-        const lifoCategories = reverseCategories(all);
-
-        setCategories(lifoCategories);
-
-        if (lifoCategories.length) {
-          setSelectedCategory(lifoCategories[0].title);
-          setOpenCategory(lifoCategories[0].id);
-        }
-      } catch (err) {
-        console.error("Failed to load categories", err);
-      }
-    };
-
-    fetchCategories();
+      const lifo = reverseCategories(all);
+      setCategories(lifo);
+      if (lifo.length) setOpenCategory(lifo[0].id);
+    });
   }, []);
 
-  /* ---------------- HANDLER ---------------- */
+  /* ---------------- LOAD CART ---------------- */
+  useEffect(() => {
+    const loadCart = () =>
+      setCartItems(JSON.parse(localStorage.getItem("cartItems") || "[]"));
 
-  const handleCategoryClick = useCallback((cat: CategoryNode) => {
-    setSelectedCategory(cat.title);
-    setOpenCategory((prev) => (prev === cat.id ? null : cat.id));
+    loadCart();
+    window.addEventListener("cartUpdated", loadCart);
+
+    return () => window.removeEventListener("cartUpdated", loadCart);
   }, []);
+
+  /* ---------------- CART HELPERS ---------------- */
+  const updateCart = (updated: CartItem[]) => {
+    localStorage.setItem("cartItems", JSON.stringify(updated));
+    setCartItems(updated);
+    window.dispatchEvent(new Event("cartUpdated"));
+  };
+
+  const increaseQty = (i: number) => {
+    const c = [...cartItems];
+    c[i].qty++;
+    updateCart(c);
+  };
+
+  const decreaseQty = (i: number) => {
+    const c = [...cartItems];
+    c[i].qty > 1 ? c[i].qty-- : c.splice(i, 1);
+    updateCart(c);
+  };
+
+  const totalQty = cartItems.reduce((s, i) => s + i.qty, 0);
+  const totalPrice = cartItems.reduce((s, i) => s + i.qty * i.price, 0);
 
   return (
     <>
+      {/* ================= HEADER ================= */}
       <AppBar
         position="static"
         elevation={0}
@@ -227,44 +244,26 @@ export default function EtsyStyleHeader() {
           color: "#000",
           px: { xs: 3, sm: 6, md: 10 },
           mt: "55px",
-          fontFamily: '"Montserrat", sans-serif',
+          fontFamily: font,
         }}
       >
-        <Toolbar
-          disableGutters
-          sx={{
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 4,
-            py: 1,
-          }}
-        >
-          {/* LOGO */}
+        <Toolbar sx={{ justifyContent: "space-between", py: 1 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Box component="img" src={logoUrl} sx={{ height: 50 }} />
 
             {showSearchAndRight && (
               <Box
-                onClick={() => setDrawerOpen(true)}
-                sx={{
-                  display: "flex",
-                  gap: 1,
-                  cursor: "pointer",
-                  alignItems: "center",
-                }}
+                onClick={() => setCategoryDrawer(true)}
+                sx={{ display: "flex", gap: 1, cursor: "pointer" }}
               >
                 <MenuIcon fontSize="small" />
-                <Typography
-                  fontWeight={600}
-                  sx={{ fontFamily: '"Montserrat", sans-serif' }}
-                >
+                <Typography fontWeight={600} sx={{ fontFamily: font }}>
                   Categories
                 </Typography>
               </Box>
             )}
           </Box>
 
-          {/* SEARCH */}
           {showSearchAndRight && (
             <SearchContainer>
               <StyledInput placeholder="Search for anything" />
@@ -274,78 +273,134 @@ export default function EtsyStyleHeader() {
             </SearchContainer>
           )}
 
-          {/* CART ICON */}
-          <IconButton onClick={() => setCartOpen(true)}>
+          <IconButton onClick={() => setCartDrawer(true)}>
             <ShoppingBagOutlinedIcon />
+            {totalQty > 0 && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 2,
+                  right: 2,
+                  width: 18,
+                  height: 18,
+                  borderRadius: "50%",
+                  bgcolor: "#000",
+                  color: "#fff",
+                  fontSize: 11,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {totalQty}
+              </Box>
+            )}
           </IconButton>
         </Toolbar>
       </AppBar>
 
-      {/* CATEGORY DRAWER */}
-      <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
-        <Box
-          sx={{
-            width: 280,
-            py: 2,
-            display: "flex",
-            flexDirection: "column",
-            height: "100%",
-          }}
-        >
-          {/* ✅ LOGO ADDED */}
-          <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-            <Box component="img" src={logoUrl} sx={{ height: 60 }} />
+      {/* ================= CATEGORIES DRAWER ================= */}
+      <Drawer
+        anchor="left"
+        open={categoryDrawer}
+        onClose={() => setCategoryDrawer(false)}
+      >
+        <Box sx={{ width: 280 }}>
+          <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
+            <Box component="img" src={logoUrl} sx={{ height: 45 }} />
           </Box>
 
           <Divider />
 
-          <List sx={{ flex: 1 }}>
+          <List disablePadding>
             <RenderCategories
               items={categories}
               openCategory={openCategory}
-              onClick={handleCategoryClick}
+              onClick={(cat) =>
+                setOpenCategory((p) => (p === cat.id ? null : cat.id))
+              }
             />
           </List>
-
-          <Divider />
-
-          <Typography
-            sx={{
-              px: 2,
-              py: 1.5,
-              fontSize: 14,
-              color: "#666",
-              fontFamily: '"Montserrat", sans-serif',
-            }}
-          >
-            Selected Category: <strong>{selectedCategory}</strong>
-          </Typography>
         </Box>
       </Drawer>
 
-      {/* CART DRAWER */}
+      {/* ================= CART DRAWER ================= */}
       <Drawer
         anchor="right"
-        open={cartOpen}
-        onClose={() => setCartOpen(false)}
+        open={cartDrawer}
+        onClose={() => setCartDrawer(false)}
       >
         <Box sx={{ width: 320, p: 2 }}>
-          <Typography
-            fontSize={18}
-            fontWeight={600}
-            sx={{ fontFamily: '"Montserrat", sans-serif' }}
-          >
+          <Typography fontSize={18} fontWeight={600} sx={{ fontFamily: font }}>
             Your Bag
           </Typography>
 
           <Divider sx={{ my: 2 }} />
 
-          <Typography
-            color="#777"
-            sx={{ fontFamily: '"Montserrat", sans-serif' }}
-          >
-            Your cart is empty
-          </Typography>
+          {cartItems.length === 0 ? (
+            <Typography color="#777" sx={{fontFamily: '"Montserrat", sans-serif',}}>Your cart is empty</Typography>
+          ) : (
+            <>
+              {cartItems.map((item, i) => (
+                <Box
+                  key={i}
+                  sx={{ display: "flex", gap: 1.5, mb: 2 }}
+                >
+                  <Box
+                    component="img"
+                    src={item.image}
+                    sx={{ width: 50, height: 50, borderRadius: 1, fontFamily: '"Montserrat", sans-serif', }}
+                  />
+
+                  <Box flex={1}>
+                    <Typography fontSize={13} fontWeight={600} sx={{fontFamily: '"Montserrat", sans-serif',}}>
+                      {item.name}
+                    </Typography>
+
+                    <Box display="flex" alignItems="center" gap={1} sx={{fontFamily: '"Montserrat", sans-serif',}}>
+                      <Button size="small" onClick={() => decreaseQty(i)}>
+                        −
+                      </Button>
+                      <Typography fontSize={12} sx={{fontFamily: '"Montserrat", sans-serif',}}>{item.qty}</Typography>
+                      <Button size="small" onClick={() => increaseQty(i)}>
+                        +
+                      </Button>
+                    </Box>
+                  </Box>
+
+                  <Typography fontSize={12} fontWeight={600} sx={{fontFamily: '"Montserrat", sans-serif',}}>
+                    LKR {(item.price * item.qty).toLocaleString()}
+                  </Typography>
+                </Box>
+              ))}
+
+              <Divider />
+
+              <Box display="flex" justifyContent="space-between" my={2}>
+                <Typography fontWeight={600} sx={{fontFamily: '"Montserrat", sans-serif',}}>Total</Typography>
+                <Typography fontWeight={700} sx={{fontFamily: '"Montserrat", sans-serif',}}>
+                  LKR {totalPrice.toLocaleString()}
+                </Typography>
+              </Box>
+
+              <Button
+                fullWidth
+                sx={{
+                  bgcolor: "#000",
+                  color: "#fff",
+                  fontFamily: '"Montserrat", sans-serif',
+                  py: 1.3,
+                  "&:hover": { bgcolor: "#333" },
+                }}
+                onClick={() => {
+                  setCartDrawer(false);
+                  navigate("/checkout");
+                }}
+              >
+                Proceed to Checkout
+              </Button>
+            </>
+          )}
         </Box>
       </Drawer>
     </>

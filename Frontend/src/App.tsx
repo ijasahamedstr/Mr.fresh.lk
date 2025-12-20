@@ -1,3 +1,4 @@
+import Checkout from "./Page/Checkout";
 import Header from "./Page/header"
 import Home from "./Page/Home";
 import ProductView from "./Page/ProductDetails";
@@ -14,6 +15,7 @@ function App() {
       <Routes>
         <Route path="/" element={< Home/>} />
          <Route path="/product/:id" element={<ProductView />} />
+         <Route path="/checkout" element={<Checkout />} />
       </Routes>
     </Router>
     </>

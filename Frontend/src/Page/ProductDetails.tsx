@@ -4,14 +4,13 @@ import axios from "axios";
 import {
   Box,
   Typography,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
   Button,
   IconButton,
   Divider,
   Stack,
   CircularProgress,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
@@ -28,9 +27,10 @@ const ProductDetail: React.FC = () => {
 
   const [product, setProduct] = useState<any>(state?.product || null);
   const [variant, setVariant] = useState<any>(null);
-  const [mainImage, setMainImage] = useState<string>("");
+  const [mainImage, setMainImage] = useState("");
   const [qty, setQty] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [openAlert, setOpenAlert] = useState(false);
 
   /* ================= FETCH PRODUCT ================= */
   useEffect(() => {
@@ -44,19 +44,65 @@ const ProductDetail: React.FC = () => {
     }
   }, [id, product]);
 
-  /* ================= DEFAULT VARIANT ================= */
+  /* ================= SET DEFAULT IMAGE ================= */
   useEffect(() => {
     if (product) {
-      if (product.variants?.length > 0) {
-        setVariant(product.variants[0]);
-        setMainImage(
-          product.variants[0].images?.[0] || product.images?.[0] || ""
-        );
-      } else {
-        setMainImage(product.images?.[0] || "");
-      }
+      setMainImage(product.images?.[0] || "");
     }
   }, [product]);
+
+  /* ================= VARIANT SELECT ================= */
+  const handleVariantSelect = (v: any) => {
+    setVariant(v);
+    setQty(1);
+
+    setMainImage(
+      v.image ||
+      v.images?.[0] ||
+      product.images?.[0]
+    );
+  };
+
+  const formatWeight = (w: any) => {
+    if (!w) return "";
+    return typeof w === "number" ? `${w} g` : w;
+  };
+
+  /* ================= ADD TO CART ================= */
+  const handleAddToCart = () => {
+    if (!variant) return;
+
+    const cart = JSON.parse(localStorage.getItem("cartItems") || "[]");
+
+    const existingIndex = cart.findIndex(
+      (item: any) =>
+        item.productId === product._id &&
+        item.variantId === variant._id
+    );
+
+    if (existingIndex !== -1) {
+      cart[existingIndex].qty += qty;
+    } else {
+      cart.push({
+        productId: product._id,
+        variantId: variant._id,
+        name: product.name,
+        variantName: variant.title || variant.name,
+        weight: variant.weight, // ✅ SAVE WEIGHT
+        price: variant.price,
+        qty,
+        image:
+          variant.image ||
+          variant.images?.[0] ||
+          product.images?.[0],
+      });
+    }
+
+    localStorage.setItem("cartItems", JSON.stringify(cart));
+    window.dispatchEvent(new Event("cartUpdated"));
+
+    setOpenAlert(true);
+  };
 
   if (loading) {
     return (
@@ -66,22 +112,9 @@ const ProductDetail: React.FC = () => {
     );
   }
 
-  if (!product) {
-    return <Typography p={3}>Product not found</Typography>;
-  }
+  if (!product) return <Typography p={3} sx={{fontFamily:Montserrat}}>Product not found</Typography>;
 
-  /* ================= HANDLERS ================= */
-  const handleVariantChange = (variantId: string) => {
-    const selected = product.variants.find(
-      (v: any) => v._id === variantId
-    );
-    if (selected) {
-      setVariant(selected);
-      setMainImage(selected.images?.[0] || mainImage);
-    }
-  };
-
-  const unitPrice = variant?.price || product.price;
+  const unitPrice = variant ? variant.price : product.price;
   const totalPrice = unitPrice * qty;
 
   return (
@@ -94,7 +127,7 @@ const ProductDetail: React.FC = () => {
         "& *": { fontFamily: Montserrat },
       }}
     >
-      <Stack direction={{ xs: "column", md: "row" }} spacing={6}>
+      <Stack direction={{ xs: "column", md: "row" }} spacing={5}>
         {/* ================= IMAGE ================= */}
         <Box flex={1.2}>
           <Box
@@ -102,141 +135,144 @@ const ProductDetail: React.FC = () => {
               aspectRatio: "1/1",
               bgcolor: "#f9f9f9",
               borderRadius: 4,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              overflow: "hidden",
             }}
           >
             <img
               src={mainImage}
               alt={product.name}
-              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                fontFamily:Montserrat
+              }}
             />
           </Box>
         </Box>
 
         {/* ================= CONTENT ================= */}
         <Box flex={1}>
-          <Typography variant="h4" fontWeight={700}>
+          <Typography fontSize={20} fontWeight={700} sx={{fontFamily:Montserrat}}>
             {product.name}
           </Typography>
 
-          <Typography variant="h5" sx={{ my: 1, fontWeight: 600 }}>
+          <Typography fontSize={18} fontWeight={600} my={0.5} sx={{fontFamily:Montserrat}}>
             LKR {unitPrice.toLocaleString()}
           </Typography>
 
-          <Typography sx={{ mb: 3 }}>{product.description}</Typography>
-
-          <Divider sx={{ mb: 3 }} />
-
-          {/* ================= VARIANTS ================= */}
-          {product.variants?.length > 0 && (
-            <Box mb={4}>
-              <Typography fontWeight={700} mb={2}>
-                Select Option
-              </Typography>
-
-              <RadioGroup
-                value={variant?._id || ""}
-                onChange={(e) => handleVariantChange(e.target.value)}
-              >
-                {product.variants.map((v: any) => (
-                  <Box
-                    key={v._id}
-                    sx={{
-                      border: "1px solid",
-                      borderColor:
-                        variant?._id === v._id ? "#1976d2" : "#e0e0e0",
-                      borderRadius: 2,
-                      mb: 1,
-                      px: 2,
-                      py: 1,
-                    }}
-                  >
-                    <FormControlLabel
-                      value={v._id}
-                      control={<Radio />}
-                      sx={{ width: "100%", m: 0 }}
-                      label={
-                        <Box
-                          display="flex"
-                          justifyContent="space-between"
-                          alignItems="center"
-                          width="100%"
-                        >
-                          <Stack direction="row" spacing={2} alignItems="center">
-                            <Box
-                              component="img"
-                              src={v.images?.[0]}
-                              sx={{
-                                width: 42,
-                                height: 42,
-                                borderRadius: 1,
-                                objectFit: "cover",
-                              }}
-                            />
-                            <Box>
-                              <Typography fontWeight={600} fontSize={14}>
-                                {v.name} ({v.weight}kg)
-                              </Typography>
-                              <Typography fontSize={12} color="text.secondary">
-                                {v.weight}kg
-                              </Typography>
-                            </Box>
-                          </Stack>
-
-                          <Typography fontWeight={700}>
-                            LKR {v.price.toLocaleString()}
-                          </Typography>
-                        </Box>
-                      }
-                    />
-                  </Box>
-                ))}
-              </RadioGroup>
-            </Box>
+          {/* ✅ SELECTED VARIANT WEIGHT */}
+          {variant?.weight && (
+            <Typography fontSize={12} color="text.secondary" sx={{fontFamily:Montserrat}}>
+              Weight: {formatWeight(variant.weight)}
+            </Typography>
           )}
 
-          {/* ================= QTY ================= */}
-          <Stack spacing={3}>
-            <Box display="flex" alignItems="center" gap={2}>
-              <Typography fontWeight={600}>Quantity</Typography>
-              <Box
-                display="flex"
-                alignItems="center"
-                border="1px solid #ddd"
-                borderRadius={2}
-              >
-                <IconButton
-                  size="small"
-                  onClick={() => qty > 1 && setQty(qty - 1)}
-                >
-                  <RemoveIcon />
-                </IconButton>
-                <Typography sx={{ minWidth: 40, textAlign: "center" }}>
-                  {qty}
-                </Typography>
-                <IconButton size="small" onClick={() => setQty(qty + 1)}>
-                  <AddIcon />
-                </IconButton>
-              </Box>
-            </Box>
+          <Typography fontSize={13} color="text.secondary" mt={2}  sx={{fontFamily:Montserrat}}>
+            {product.description}
+          </Typography>
 
-            <Button
-              variant="contained"
-              size="large"
-              sx={{
-                py: 2,
-                borderRadius: 2,
-                background: "#000",
-                "&:hover": { background: "#333" },
-              }}
-            >
-              Add to Cart — LKR {totalPrice.toLocaleString()}
-            </Button>
+          <Divider sx={{ my: 3 }} />
+
+          {/* ================= VARIANTS ================= */}
+          {product.variants?.map((v: any) => {
+            const selected = variant?._id === v._id;
+
+            return (
+              <Box
+                key={v._id}
+                onClick={() => handleVariantSelect(v)}
+                sx={{
+                  border: selected ? "2px solid #000" : "1px solid #ddd",
+                  borderRadius: 2,
+                  mb: 1.5,
+                  p: 1.8,
+                  cursor: "pointer",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  background: selected ? "#f5f5f5" : "#fff",
+                }}
+              >
+                <Stack direction="row" spacing={2} alignItems="center">
+                  {/* VARIANT IMAGE */}
+                  <Box
+                    component="img"
+                    src={v.image || v.images?.[0]}
+                    sx={{
+                      width: 45,
+                      height: 45,
+                      borderRadius: 1,
+                      objectFit: "cover",
+                    }}
+                  />
+
+                  <Box>
+                    <Typography fontSize={13} fontWeight={600}  sx={{fontFamily:Montserrat}}>
+                      {v.title || v.name}
+                    </Typography>
+
+                    {/* ✅ VARIANT WEIGHT */}
+                    {v.weight && (
+                      <Typography fontSize={11} color="text.secondary" sx={{fontFamily:Montserrat}}>
+                        {formatWeight(v.weight)}
+                      </Typography>
+                    )}
+                  </Box>
+                </Stack>
+
+                <Typography fontSize={12} fontWeight={600} sx={{fontFamily:Montserrat}}>
+                  LKR {v.price.toLocaleString()}
+                </Typography>
+              </Box>
+            );
+          })}
+
+          {/* ================= QTY ================= */}
+          <Stack direction="row" alignItems="center" spacing={2} my={3}>
+            <IconButton onClick={() => qty > 1 && setQty(qty - 1)}>
+              <RemoveIcon />
+            </IconButton>
+
+            <Typography>{qty}</Typography>
+
+            <IconButton onClick={() => setQty(qty + 1)}>
+              <AddIcon />
+            </IconButton>
           </Stack>
+
+          {/* ================= ADD TO CART ================= */}
+          <Button
+            fullWidth
+            variant="contained"
+            disabled={!variant}
+            onClick={handleAddToCart}
+            sx={{
+              py: 1.6,
+              borderRadius: 2,
+              fontFamily:Montserrat,
+              background: "#000",
+              "&:hover": { background: "#333" },
+            }}
+          >
+            {variant
+              ? `Add to Cart — LKR ${totalPrice.toLocaleString()}`
+              : "Please select an option"}
+          </Button>
         </Box>
       </Stack>
+
+      {/* ================= SUCCESS ALERT ================= */}
+      <Snackbar
+        open={openAlert}
+        autoHideDuration={1500}
+        onClose={() => setOpenAlert(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="success" sx={{fontFamily:Montserrat}}>
+          {product.name} added to cart
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

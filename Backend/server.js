@@ -21,8 +21,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: [
-      "https://mr-fresh-lk.vercel.app",
-      "https://mr-fresh-lk-server.vercel.app",
+      "http://localhost:3002",
+      "http://localhost:5173",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
