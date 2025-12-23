@@ -126,6 +126,7 @@ const ProductDetail: React.FC = () => {
         p: { xs: 2, md: 4 },
         fontFamily: Montserrat,
         color: "#000",
+        bgcolor: "#fff",        // ✅ WHITE BACKGROUND   // ✅ FULL PAGE WHITE
         "& *": {
           fontFamily: Montserrat,
           color: "#000",
