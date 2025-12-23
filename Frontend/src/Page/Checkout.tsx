@@ -134,6 +134,13 @@ const openWhatsApp = (orderId: string) => {
       ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}`
       : "Location not available";
 
+  const orderNames = cartItems
+    .map(
+      (item: any) =>
+        `• ${item.name}${item.variant ? ` (${item.variant})` : ""} x ${item.qty}`
+    )
+    .join("\n");
+
   const message = `
 *🛒 New Order Received*
 
@@ -146,7 +153,10 @@ ${street}, ${unit ? unit + "," : ""} ${city}
 ${postal}
 
 *Order ID:* ${orderId}
-*Order Name:* ${orderId}
+
+*Order Items:*
+${orderNames}
+
 *Items Total:* LKR ${itemsTotal.toLocaleString()}
 *Delivery:* LKR ${deliveryCharge.toLocaleString()}
 *Grand Total:* LKR ${grandTotal.toLocaleString()}
