@@ -8,7 +8,9 @@ import {
   IconButton,
   MenuItem,
   Dialog,
+  Snackbar,
   DialogContent,
+  Alert,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
@@ -86,10 +88,26 @@ export default function Checkout() {
 
   const grandTotal = itemsTotal + deliveryCharge;
 
-  /* ---------------- GPS ---------------- */
+    /* ---------------- MATERIAL ALERT ---------------- */
+  const [snack, setSnack] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error";
+  }>({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+
+/* ---------------- GPS ---------------- */
   const useMyLocation = () => {
     if (!navigator.geolocation) {
-      alert("GPS not supported");
+      setSnack({
+        open: true,
+        message: "GPS not supported",
+        severity: "error",
+      });
       return;
     }
 
@@ -100,9 +118,51 @@ export default function Checkout() {
         setCenter({ lat, lng });
         setCoords({ lat, lng });
       },
-      () => alert("Please enable location permission")
+      () =>
+        setSnack({
+          open: true,
+          message: "Please enable location permission",
+          severity: "error",
+        })
     );
   };
+
+  /* ---------------- WHATSAPP ---------------- */
+const openWhatsApp = (orderId: string) => {
+  const mapUrl =
+    coords && coords.lat && coords.lng
+      ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}`
+      : "Location not available";
+
+  const message = `
+*🛒 New Order Received*
+
+*Name:* ${name || "N/A"}
+*Mobile:* +94${whatsapp || "N/A"}
+*Delivery Area:* ${location || "N/A"}
+
+*Address:*
+${street}, ${unit ? unit + "," : ""} ${city}
+${postal}
+
+*Order ID:* ${orderId}
+*Items Total:* LKR ${itemsTotal.toLocaleString()}
+*Delivery:* LKR ${deliveryCharge.toLocaleString()}
+*Grand Total:* LKR ${grandTotal.toLocaleString()}
+
+📍 Map:
+${mapUrl}
+
+_Sent via MrFresh.lk Checkout_
+  `;
+
+  const phoneNumber = "94767080553";
+  window.open(
+    `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`,
+    "_blank"
+  );
+};
+
 
   /* ---------------- PLACE ORDER ---------------- */
   const placeOrder = async () => {
@@ -142,11 +202,27 @@ export default function Checkout() {
 
       if (!resp.ok) throw new Error();
 
+      const data = await resp.json();
+      const orderId = data?.orderId || "AUTO";
+
+      // ✅ SEND WHATSAPP AFTER SAVE
+      openWhatsApp(orderId);
+
+
+     setSnack({
+        open: true,
+        message: "Order placed successfully & sent to WhatsApp",
+        severity: "success",
+      });
+
       localStorage.removeItem("cartItems");
-      alert("✅ Order placed successfully");
-      navigate("/");
+      setTimeout(() => navigate("/"), 1500);
     } catch {
-      alert("❌ Failed to place order");
+      setSnack({
+        open: true,
+        message: "Failed to place order",
+        severity: "error",
+      });
     }
   };
 
@@ -672,6 +748,16 @@ export default function Checkout() {
         </Box>
       </DialogContent>
     </Dialog>
+
+        {/* ================= MATERIAL ALERT ================= */}
+          <Snackbar
+            open={snack.open}
+            autoHideDuration={3000}
+            onClose={() => setSnack({ ...snack, open: false })}
+          >
+            <Alert severity={snack.severity}>{snack.message}</Alert>
+          </Snackbar>
+    
     </Box>
   );
 }
