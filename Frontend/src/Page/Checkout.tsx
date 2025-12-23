@@ -146,6 +146,7 @@ ${street}, ${unit ? unit + "," : ""} ${city}
 ${postal}
 
 *Order ID:* ${orderId}
+*Order Name:* ${orderId}
 *Items Total:* LKR ${itemsTotal.toLocaleString()}
 *Delivery:* LKR ${deliveryCharge.toLocaleString()}
 *Grand Total:* LKR ${grandTotal.toLocaleString()}
