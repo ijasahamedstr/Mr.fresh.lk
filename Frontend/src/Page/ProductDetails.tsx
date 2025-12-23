@@ -124,6 +124,8 @@ const ProductDetail: React.FC = () => {
         maxWidth: 1100,
         mx: "auto",
         p: { xs: 2, md: 4 },
+        minHeight: "100vh",
+        bgcolor: "#fff", // ✅ WHITE BACKGROUND
         fontFamily: Montserrat,
         "& *": { fontFamily: Montserrat },
       }}
@@ -137,7 +139,7 @@ const ProductDetail: React.FC = () => {
           color: "#000",
           fontWeight: 600,
           textTransform: "none",
-          fontFamily: '"Montserrat", sans-serif',
+          fontFamily: Montserrat,
         }}
       >
         Back to Home
@@ -205,7 +207,6 @@ const ProductDetail: React.FC = () => {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  bgcolor: "#fff",
                   background: selected ? "#f5f5f5" : "#fff",
                 }}
               >
