@@ -110,7 +110,7 @@ const ProductDetail: React.FC = () => {
 
   if (!product)
     return (
-      <Typography p={3} sx={{ fontFamily: Montserrat }}>
+      <Typography p={3} sx={{ fontFamily: Montserrat, color: "#000" }}>
         Product not found
       </Typography>
     );
@@ -124,22 +124,24 @@ const ProductDetail: React.FC = () => {
         maxWidth: 1100,
         mx: "auto",
         p: { xs: 2, md: 4 },
-        minHeight: "100vh",
-        bgcolor: "#fff", // ✅ WHITE BACKGROUND
         fontFamily: Montserrat,
-        "& *": { fontFamily: Montserrat },
+        color: "#000",
+        "& *": {
+          fontFamily: Montserrat,
+          color: "#000",
+        },
       }}
     >
-      {/* ================= BACK TO HOME ================= */}
+      {/* ================= BACK ================= */}
       <Button
         startIcon={<ArrowBackIcon />}
         onClick={() => navigate("/")}
         sx={{
           mb: 2,
-          color: "#000",
           fontWeight: 600,
           textTransform: "none",
-          fontFamily: Montserrat,
+          color: "#000",
+          fontFamily: Montserrat
         }}
       >
         Back to Home
@@ -151,7 +153,7 @@ const ProductDetail: React.FC = () => {
           <Box
             sx={{
               aspectRatio: "1/1",
-              bgcolor: "#f9f9f9",
+              bgcolor: "#F8FAFC",
               borderRadius: 4,
               overflow: "hidden",
             }}
@@ -170,21 +172,21 @@ const ProductDetail: React.FC = () => {
 
         {/* ================= CONTENT ================= */}
         <Box flex={1}>
-          <Typography fontSize={20} fontWeight={700}>
+          <Typography fontSize={20} fontWeight={700}  sx={{ fontFamily: Montserrat }}>
             {product.name}
           </Typography>
 
-          <Typography fontSize={18} fontWeight={600} my={0.5}>
+          <Typography fontSize={18} fontWeight={600} my={0.5}  sx={{ fontFamily: Montserrat }}>
             LKR {unitPrice.toLocaleString()}
           </Typography>
 
           {variant?.weight && (
-            <Typography fontSize={12} color="text.secondary">
+            <Typography fontSize={12}  sx={{ fontFamily: Montserrat }}>
               Weight: {formatWeight(variant.weight)}
             </Typography>
           )}
 
-          <Typography fontSize={13} color="text.secondary" mt={2}>
+          <Typography fontSize={13} mt={2}  sx={{ fontFamily: Montserrat }}>
             {product.description}
           </Typography>
 
@@ -192,54 +194,67 @@ const ProductDetail: React.FC = () => {
 
           {/* ================= VARIANTS ================= */}
           {product.variants?.map((v: any) => {
-            const selected = variant?._id === v._id;
+          const selected = variant?._id === v._id;
 
-            return (
-              <Box
-                key={v._id}
-                onClick={() => handleVariantSelect(v)}
-                sx={{
-                  border: selected ? "2px solid #000" : "1px solid #ddd",
-                  borderRadius: 2,
-                  mb: 1.5,
-                  p: 1.8,
-                  cursor: "pointer",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  background: selected ? "#f5f5f5" : "#fff",
-                }}
-              >
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <Box
-                    component="img"
-                    src={v.image || v.images?.[0]}
-                    sx={{
-                      width: 45,
-                      height: 45,
-                      borderRadius: 1,
-                      objectFit: "cover",
-                    }}
-                  />
+          return (
+            <Box
+              key={v._id}
+              onClick={() => handleVariantSelect(v)}
+              sx={{
+                border: selected ? "2px solid #000" : "1px solid #CBD5E1",
+                borderRadius: 2,
+                mb: 1.5,
+                p: 1.8,
+                cursor: "pointer",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                background: selected ? "#E2E8F0" : "#F1F5F9",
+                fontFamily: Montserrat, // ✅ CARD FONT
+              }}
+            >
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Box
+                  component="img"
+                  src={v.image || v.images?.[0]}
+                  sx={{
+                    width: 45,
+                    height: 45,
+                    borderRadius: 1,
+                    objectFit: "cover",
+                  }}
+                />
 
-                  <Box>
-                    <Typography fontSize={13} fontWeight={600}>
-                      {v.title || v.name}
+                <Box>
+                  <Typography
+                    fontSize={13}
+                    fontWeight={600}
+                    sx={{ fontFamily: Montserrat }} // ✅ TITLE FONT
+                  >
+                    {v.title || v.name}
+                  </Typography>
+
+                  {v.weight && (
+                    <Typography
+                      fontSize={11}
+                      sx={{ fontFamily: Montserrat }} // ✅ WEIGHT FONT
+                    >
+                      {formatWeight(v.weight)}
                     </Typography>
-                    {v.weight && (
-                      <Typography fontSize={11} color="text.secondary">
-                        {formatWeight(v.weight)}
-                      </Typography>
-                    )}
-                  </Box>
-                </Stack>
+                  )}
+                </Box>
+              </Stack>
 
-                <Typography fontSize={12} fontWeight={600}>
-                  LKR {v.price.toLocaleString()}
-                </Typography>
-              </Box>
-            );
-          })}
+              <Typography
+                fontSize={12}
+                fontWeight={600}
+                sx={{ fontFamily: Montserrat }} // ✅ PRICE FONT
+              >
+                LKR {v.price.toLocaleString()}
+              </Typography>
+            </Box>
+          );
+        })}
 
           {/* ================= QTY ================= */}
           <Stack direction="row" alignItems="center" spacing={2} my={3}>
@@ -247,7 +262,7 @@ const ProductDetail: React.FC = () => {
               <RemoveIcon />
             </IconButton>
 
-            <Typography>{qty}</Typography>
+            <Typography fontWeight={600}>{qty}</Typography>
 
             <IconButton onClick={() => setQty(qty + 1)}>
               <AddIcon />
@@ -264,7 +279,8 @@ const ProductDetail: React.FC = () => {
               py: 1.6,
               borderRadius: 2,
               background: "#000",
-              "&:hover": { background: "#333" },
+              color: "#fff",
+              "&:hover": { background: "#111" },
             }}
           >
             {variant
