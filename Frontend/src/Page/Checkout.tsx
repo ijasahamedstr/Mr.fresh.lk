@@ -17,6 +17,7 @@ import MyLocationIcon from "@mui/icons-material/MyLocation";
 import { useNavigate } from "react-router-dom";
 import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
 
+
 /* ================= API ================= */
 const API_HOST = import.meta.env.VITE_API_HOST;
 
@@ -698,72 +699,116 @@ export default function Checkout() {
 
 
       {/* ================= MAP MODAL ================= */}
-     <Dialog
-      open={openMap}
-      fullWidth
-      maxWidth="sm"
-      PaperProps={{
-        sx: {
-          fontFamily: '"Montserrat", sans-serif',
-          "& *": { fontFamily: '"Montserrat", sans-serif' },
-        },
-      }}
-    >
-      <DialogContent sx={{ p: 0 }}>
-        <Box sx={{ height: 360, position: "relative" }}>
-          {isLoaded && (
-            <GoogleMap
-              mapContainerStyle={MAP_CONTAINER_STYLE}
-              center={center}
-              zoom={17}
-              options={{ styles: GOOGLE_MAP_STYLE, disableDefaultUI: true }}
-              onLoad={(map: google.maps.Map) => {
-                mapRef.current = map;
-              }}
-              onIdle={() => {
-                if (!mapRef.current) return;
-                const c = mapRef.current.getCenter();
-                if (!c) return;
-                setCoords({ lat: c.lat(), lng: c.lng() });
-              }}
-            />
-          )}
-
-          <IconButton
-            onClick={useMyLocation}
+      <Dialog
+        open={openMap}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            fontFamily: '"Montserrat", sans-serif',
+            "& *": { fontFamily: '"Montserrat", sans-serif' },
+          },
+        }}
+      >
+        <DialogContent sx={{ p: 0 }}>
+          <Box sx={{ height: 360, position: "relative" }}>
+            {/* 🔙 BACK TO ADDRESS */}
+            <IconButton
+            onClick={() => {
+              setOpenMap(false);
+              setOpenAddress(true);
+            }}
             sx={{
               position: "absolute",
-              bottom: 80,
-              right: 12,
+              top: 12,
+              left: 12,
+              zIndex: 10,
               bgcolor: "#fff",
+              color: "#000",
               boxShadow: 2,
-              fontFamily: '"Montserrat", sans-serif',
+              "&:hover": { bgcolor: "#fff" },
             }}
           >
-            <MyLocationIcon />
+            <ArrowBackIcon />
           </IconButton>
-        </Box>
 
-        <Box sx={{ p: 1.5 }}>
-          <Button
-            fullWidth
-            disabled={!coords}
-            sx={{
-              bgcolor: "#1f2937",
-              color: "#fff",
-              py: 1.3,
-              fontFamily: '"Montserrat", sans-serif',
-            }}
-            onClick={() => {
-              setLocationConfirmed(true);
-              setOpenMap(false);
-            }}
-          >
-            Confirm
-          </Button>
-        </Box>
-      </DialogContent>
-    </Dialog>
+            {/* 🧹 CLEAR MAP SELECTION */}
+            <Button
+              onClick={() => {
+                setCoords(null);
+                setLocationConfirmed(false);
+                setCenter(DEFAULT_CENTER);
+              }}
+              sx={{
+                position: "absolute",
+                top: 12,
+                right: 12,
+                zIndex: 10,
+                bgcolor: "#fff",
+                color: "#000",
+                fontWeight: 600,
+                textTransform: "none",
+                boxShadow: 2,
+                fontFamily:font,
+              }}
+            >
+              Clear
+            </Button>
+
+            {isLoaded && (
+              <GoogleMap
+                mapContainerStyle={MAP_CONTAINER_STYLE}
+                center={center}
+                zoom={17}
+                options={{ styles: GOOGLE_MAP_STYLE, disableDefaultUI: true }}
+                onLoad={(map: google.maps.Map) => {
+                  mapRef.current = map;
+                }}
+                onIdle={() => {
+                  if (!mapRef.current) return;
+                  const c = mapRef.current.getCenter();
+                  if (!c) return;
+                  setCoords({ lat: c.lat(), lng: c.lng() });
+                }}
+              />
+            )}
+
+            {/* 📍 USE MY LOCATION */}
+            <IconButton
+              onClick={useMyLocation}
+              sx={{
+                position: "absolute",
+                bottom: 80,
+                right: 12,
+                bgcolor: "#fff",
+                boxShadow: 2,
+              }}
+            >
+              <MyLocationIcon />
+            </IconButton>
+          </Box>
+
+          <Box sx={{ p: 1.5 }}>
+            <Button
+              fullWidth
+              disabled={!coords}
+              sx={{
+                bgcolor: "#1f2937",
+                color: "#fff",
+                py: 1.3,
+              }}
+              onClick={() => {
+                setLocationConfirmed(true);
+                setOpenMap(false);
+              }}
+            >
+              Confirm
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+
 
         {/* ================= MATERIAL ALERT ================= */}
           <Snackbar

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   Box,
@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 /* ================= ENV ================= */
 const API_HOST = import.meta.env.VITE_API_HOST;
@@ -24,6 +25,7 @@ const Montserrat = '"Montserrat", sans-serif';
 const ProductDetail: React.FC = () => {
   const { id } = useParams();
   const { state } = useLocation();
+  const navigate = useNavigate();
 
   const [product, setProduct] = useState<any>(state?.product || null);
   const [variant, setVariant] = useState<any>(null);
@@ -55,12 +57,7 @@ const ProductDetail: React.FC = () => {
   const handleVariantSelect = (v: any) => {
     setVariant(v);
     setQty(1);
-
-    setMainImage(
-      v.image ||
-      v.images?.[0] ||
-      product.images?.[0]
-    );
+    setMainImage(v.image || v.images?.[0] || product.images?.[0]);
   };
 
   const formatWeight = (w: any) => {
@@ -88,7 +85,7 @@ const ProductDetail: React.FC = () => {
         variantId: variant._id,
         name: product.name,
         variantName: variant.title || variant.name,
-        weight: variant.weight, // ✅ SAVE WEIGHT
+        weight: variant.weight,
         price: variant.price,
         qty,
         image:
@@ -100,7 +97,6 @@ const ProductDetail: React.FC = () => {
 
     localStorage.setItem("cartItems", JSON.stringify(cart));
     window.dispatchEvent(new Event("cartUpdated"));
-
     setOpenAlert(true);
   };
 
@@ -112,7 +108,12 @@ const ProductDetail: React.FC = () => {
     );
   }
 
-  if (!product) return <Typography p={3} sx={{fontFamily:Montserrat}}>Product not found</Typography>;
+  if (!product)
+    return (
+      <Typography p={3} sx={{ fontFamily: Montserrat }}>
+        Product not found
+      </Typography>
+    );
 
   const unitPrice = variant ? variant.price : product.price;
   const totalPrice = unitPrice * qty;
@@ -127,6 +128,21 @@ const ProductDetail: React.FC = () => {
         "& *": { fontFamily: Montserrat },
       }}
     >
+      {/* ================= BACK TO HOME ================= */}
+      <Button
+        startIcon={<ArrowBackIcon />}
+        onClick={() => navigate("/")}
+        sx={{
+          mb: 2,
+          color: "#000",
+          fontWeight: 600,
+          textTransform: "none",
+          fontFamily: '"Montserrat", sans-serif',
+        }}
+      >
+        Back to Home
+      </Button>
+
       <Stack direction={{ xs: "column", md: "row" }} spacing={5}>
         {/* ================= IMAGE ================= */}
         <Box flex={1.2}>
@@ -145,7 +161,6 @@ const ProductDetail: React.FC = () => {
                 width: "100%",
                 height: "100%",
                 objectFit: "contain",
-                fontFamily:Montserrat
               }}
             />
           </Box>
@@ -153,22 +168,21 @@ const ProductDetail: React.FC = () => {
 
         {/* ================= CONTENT ================= */}
         <Box flex={1}>
-          <Typography fontSize={20} fontWeight={700} sx={{fontFamily:Montserrat}}>
+          <Typography fontSize={20} fontWeight={700}>
             {product.name}
           </Typography>
 
-          <Typography fontSize={18} fontWeight={600} my={0.5} sx={{fontFamily:Montserrat}}>
+          <Typography fontSize={18} fontWeight={600} my={0.5}>
             LKR {unitPrice.toLocaleString()}
           </Typography>
 
-          {/* ✅ SELECTED VARIANT WEIGHT */}
           {variant?.weight && (
-            <Typography fontSize={12} color="text.secondary" sx={{fontFamily:Montserrat}}>
+            <Typography fontSize={12} color="text.secondary">
               Weight: {formatWeight(variant.weight)}
             </Typography>
           )}
 
-          <Typography fontSize={13} color="text.secondary" mt={2}  sx={{fontFamily:Montserrat}}>
+          <Typography fontSize={13} color="text.secondary" mt={2}>
             {product.description}
           </Typography>
 
@@ -195,7 +209,6 @@ const ProductDetail: React.FC = () => {
                 }}
               >
                 <Stack direction="row" spacing={2} alignItems="center">
-                  {/* VARIANT IMAGE */}
                   <Box
                     component="img"
                     src={v.image || v.images?.[0]}
@@ -208,20 +221,18 @@ const ProductDetail: React.FC = () => {
                   />
 
                   <Box>
-                    <Typography fontSize={13} fontWeight={600}  sx={{fontFamily:Montserrat}}>
+                    <Typography fontSize={13} fontWeight={600}>
                       {v.title || v.name}
                     </Typography>
-
-                    {/* ✅ VARIANT WEIGHT */}
                     {v.weight && (
-                      <Typography fontSize={11} color="text.secondary" sx={{fontFamily:Montserrat}}>
+                      <Typography fontSize={11} color="text.secondary">
                         {formatWeight(v.weight)}
                       </Typography>
                     )}
                   </Box>
                 </Stack>
 
-                <Typography fontSize={12} fontWeight={600} sx={{fontFamily:Montserrat}}>
+                <Typography fontSize={12} fontWeight={600}>
                   LKR {v.price.toLocaleString()}
                 </Typography>
               </Box>
@@ -250,7 +261,6 @@ const ProductDetail: React.FC = () => {
             sx={{
               py: 1.6,
               borderRadius: 2,
-              fontFamily:Montserrat,
               background: "#000",
               "&:hover": { background: "#333" },
             }}
@@ -269,7 +279,7 @@ const ProductDetail: React.FC = () => {
         onClose={() => setOpenAlert(false)}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert severity="success" sx={{fontFamily:Montserrat}}>
+        <Alert severity="success">
           {product.name} added to cart
         </Alert>
       </Snackbar>
