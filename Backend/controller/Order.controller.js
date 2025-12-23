@@ -12,7 +12,6 @@ export const createOrder = async (req, res) => {
       totals,
     } = req.body;
 
-    // ✅ STRONG VALIDATION (FIXED ERROR)
     if (
       !mapLocation ||
       typeof mapLocation.lat !== "number" ||
@@ -24,7 +23,7 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    const order = await Order.create({
+    const order = await OrderModel.create({
       customer,
       items,
       delivery,
@@ -35,7 +34,6 @@ export const createOrder = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "Order placed successfully",
       orderId: order._id,
     });
   } catch (error) {

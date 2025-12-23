@@ -2,25 +2,11 @@ import mongoose from "mongoose";
 
 const OrderSchema = new mongoose.Schema(
   {
-    customer: {
-      name: { type: String, required: true },
-      whatsapp: { type: String, required: true },
-    },
+    customer: { type: Object, required: true },
+    items: { type: Array, required: true },
+    delivery: { type: Object, required: true },
 
-    items: [
-      {
-        name: String,
-        price: Number,
-        qty: Number,
-        image: String,
-      },
-    ],
-
-    delivery: {
-      location: String,
-      charge: Number,
-    },
-
+    // ✅ MUST BE OBJECT (NOT STRING)
     address: {
       street: String,
       unit: String,
@@ -29,23 +15,17 @@ const OrderSchema = new mongoose.Schema(
       country: String,
     },
 
-    // ✅ GOOGLE MAP LOCATION
     mapLocation: {
-      lat: { type: Number, required: true },
-      lng: { type: Number, required: true },
+      lat: Number,
+      lng: Number,
     },
 
-    totals: {
-      itemsTotal: Number,
-      grandTotal: Number,
-    },
-
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
+    totals: { type: Object, required: true },
+    status: { type: String, default: "pending" },
   },
   { timestamps: true }
 );
 
-export default mongoose.model("Order", OrderSchema);
+// ✅ PREVENT MODEL RECOMPILE BUG
+export default mongoose.models.Order ||
+  mongoose.model("Order", OrderSchema);
