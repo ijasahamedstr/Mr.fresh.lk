@@ -205,6 +205,7 @@ const ProductDetail: React.FC = () => {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
+                  bgcolor: "#fff",
                   background: selected ? "#f5f5f5" : "#fff",
                 }}
               >
