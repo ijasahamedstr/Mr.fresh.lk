@@ -95,12 +95,12 @@ const RenderCategories = ({
   items,
   level = 0,
   openCategory,
-  onClick,
+  onToggle,
 }: {
   items: CategoryNode[];
   level?: number;
   openCategory: string | null;
-  onClick: (cat: CategoryNode) => void;
+  onToggle: (id: string) => void;
 }) => (
   <>
     {items.map((cat) => {
@@ -110,7 +110,7 @@ const RenderCategories = ({
         <Box key={cat.id}>
           <ListItem disablePadding>
             <ListItemButton
-              onClick={() => onClick(cat)}
+              onClick={() => onToggle(cat.id)}
               sx={{
                 pl: 2 + level * 2,
                 py: 1.2,
@@ -155,7 +155,7 @@ const RenderCategories = ({
                 items={cat.children}
                 level={level + 1}
                 openCategory={openCategory}
-                onClick={onClick}
+                onToggle={onToggle}
               />
             </Collapse>
           )}
@@ -194,24 +194,33 @@ export default function EtsyStyleHeader() {
         if (sec.categories) all = all.concat(sec.categories);
       });
 
-      const lifo = reverseCategories(all);
-      setCategories(lifo);
-      if (lifo.length) setOpenCategory(lifo[0].id);
+      setCategories(reverseCategories(all));
+      setOpenCategory(null);
     });
   }, []);
 
-  /* ---------------- LOAD CART ---------------- */
-  useEffect(() => {
-    const loadCart = () =>
-      setCartItems(JSON.parse(localStorage.getItem("cartItems") || "[]"));
+  /* ---------------- LOAD CART (SAFE + AUTO CLEAR SUPPORT) ---------------- */
+ useEffect(() => {
+    const loadCart = () => {
+      try {
+        const stored = localStorage.getItem("cartItems");
+        setCartItems(stored ? JSON.parse(stored) : []);
+      } catch {
+        setCartItems([]);
+      }
+    };
 
     loadCart();
     window.addEventListener("cartUpdated", loadCart);
+    window.addEventListener("storage", loadCart);
 
-    return () => window.removeEventListener("cartUpdated", loadCart);
+    return () => {
+      window.removeEventListener("cartUpdated", loadCart);
+      window.removeEventListener("storage", loadCart);
+    };
   }, []);
 
-  /* ---------------- CART HELPERS ---------------- */
+  /* ---------------- CART HELPERS (OLD LOGIC KEPT) ---------------- */
   const updateCart = (updated: CartItem[]) => {
     localStorage.setItem("cartItems", JSON.stringify(updated));
     setCartItems(updated);
@@ -316,8 +325,8 @@ export default function EtsyStyleHeader() {
             <RenderCategories
               items={categories}
               openCategory={openCategory}
-              onClick={(cat) =>
-                setOpenCategory((p) => (p === cat.id ? null : cat.id))
+              onToggle={(id) =>
+                setOpenCategory((prev) => (prev === id ? null : id))
               }
             />
           </List>
@@ -325,50 +334,67 @@ export default function EtsyStyleHeader() {
       </Drawer>
 
       {/* ================= CART DRAWER ================= */}
+
       <Drawer
         anchor="right"
         open={cartDrawer}
         onClose={() => setCartDrawer(false)}
       >
-        <Box sx={{ width: 320, p: 2 }}>
-          <Typography fontSize={18} fontWeight={600} sx={{ fontFamily: font }}>
+        <Box
+          sx={{
+            width: 320,
+            p: 2,
+            fontFamily: '"Montserrat", sans-serif',
+            "& *": {
+              fontFamily: '"Montserrat", sans-serif',
+            },
+          }}
+        >
+          <Typography fontSize={18} fontWeight={600} sx={{fontFamily:font}}>
             Your Bag
           </Typography>
 
           <Divider sx={{ my: 2 }} />
 
           {cartItems.length === 0 ? (
-            <Typography color="#777" sx={{fontFamily: '"Montserrat", sans-serif',}}>Your cart is empty</Typography>
+            <Typography color="#777" sx={{fontFamily:font}}>
+              Your cart is empty
+            </Typography>
           ) : (
             <>
               {cartItems.map((item, i) => (
                 <Box
                   key={i}
-                  sx={{ display: "flex", gap: 1.5, mb: 2 }}
+                  sx={{ display: "flex", gap: 1.5, mb: 2, alignItems: "center" }}
                 >
                   <Box
                     component="img"
                     src={item.image}
-                    sx={{ width: 50, height: 50, borderRadius: 1, fontFamily: '"Montserrat", sans-serif', }}
+                    sx={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 1,
+                      objectFit: "cover",
+                    }}
                   />
 
                   <Box flex={1}>
-                    <Typography fontSize={13} fontWeight={600} sx={{fontFamily: '"Montserrat", sans-serif',}}>
+                    <Typography fontSize={13} fontWeight={600}>
                       {item.name}
                     </Typography>
 
-                    <Box display="flex" alignItems="center" gap={1} sx={{fontFamily: '"Montserrat", sans-serif',}}>
+                    <Box display="flex" alignItems="center" gap={1}>
                       <Button size="small" onClick={() => decreaseQty(i)}>
                         −
                       </Button>
-                      <Typography fontSize={12} sx={{fontFamily: '"Montserrat", sans-serif',}}>{item.qty}</Typography>
+                      <Typography fontSize={12}>{item.qty}</Typography>
                       <Button size="small" onClick={() => increaseQty(i)}>
                         +
                       </Button>
                     </Box>
                   </Box>
 
-                  <Typography fontSize={12} fontWeight={600} sx={{fontFamily: '"Montserrat", sans-serif',}}>
+                  <Typography fontSize={12} fontWeight={600}>
                     LKR {(item.price * item.qty).toLocaleString()}
                   </Typography>
                 </Box>
@@ -377,8 +403,8 @@ export default function EtsyStyleHeader() {
               <Divider />
 
               <Box display="flex" justifyContent="space-between" my={2}>
-                <Typography fontWeight={600} sx={{fontFamily: '"Montserrat", sans-serif',}}>Total</Typography>
-                <Typography fontWeight={700} sx={{fontFamily: '"Montserrat", sans-serif',}}>
+                <Typography fontWeight={600}>Total</Typography>
+                <Typography fontWeight={700}>
                   LKR {totalPrice.toLocaleString()}
                 </Typography>
               </Box>
@@ -388,8 +414,8 @@ export default function EtsyStyleHeader() {
                 sx={{
                   bgcolor: "#000",
                   color: "#fff",
-                  fontFamily: '"Montserrat", sans-serif',
                   py: 1.3,
+                  fontFamily: '"Montserrat", sans-serif',
                   "&:hover": { bgcolor: "#333" },
                 }}
                 onClick={() => {
@@ -403,6 +429,8 @@ export default function EtsyStyleHeader() {
           )}
         </Box>
       </Drawer>
+
+    
     </>
   );
 }

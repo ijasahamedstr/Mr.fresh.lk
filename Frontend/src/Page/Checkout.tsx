@@ -128,52 +128,51 @@ export default function Checkout() {
   };
 
   /* ---------------- WHATSAPP ---------------- */
-const openWhatsApp = (orderId: string) => {
-  const mapUrl =
-    coords && coords.lat && coords.lng
-      ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}`
-      : "Location not available";
+    const openWhatsApp = (orderId: string) => {
+    const mapUrl =
+      coords && coords.lat && coords.lng
+        ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}`
+        : "Location not available";
 
-  const orderNames = cartItems
-    .map(
-      (item: any) =>
-        `• ${item.name}${item.variant ? ` (${item.variant})` : ""} x ${item.qty}`
-    )
-    .join("\n");
+    const orderNames = cartItems
+      .map(
+        (item: any) =>
+          `• ${item.name}${item.variant ? ` (${item.variant})` : ""} x ${item.qty}`
+      )
+      .join("\n");
 
-  const message = `
-*🛒 New Order Received*
+    const message = `
+  *🛒 New Order Received*
 
-*Name:* ${name || "N/A"}
-*Mobile:* +94${whatsapp || "N/A"}
-*Delivery Area:* ${location || "N/A"}
+  *Name:* ${name || "N/A"}
+  *Mobile:* +94${whatsapp || "N/A"}
+  *Delivery Area:* ${location || "N/A"}
 
-*Address:*
-${street}, ${unit ? unit + "," : ""} ${city}
-${postal}
+  *Address:*
+  ${street}, ${unit ? unit + "," : ""} ${city}
+  ${postal}
 
-*Order ID:* ${orderId}
+  *Order ID:* ${orderId}
 
-*Order Items:*
-${orderNames}
+  *Order Items:*
+  ${orderNames}
 
-*Items Total:* LKR ${itemsTotal.toLocaleString()}
-*Delivery:* LKR ${deliveryCharge.toLocaleString()}
-*Grand Total:* LKR ${grandTotal.toLocaleString()}
+  *Items Total:* LKR ${itemsTotal.toLocaleString()}
+  *Delivery:* LKR ${deliveryCharge.toLocaleString()}
+  *Grand Total:* LKR ${grandTotal.toLocaleString()}
 
-📍 Map:
-${mapUrl}
+  📍 Map:
+  ${mapUrl}
 
-_Sent via MrFresh.lk Checkout_
-  `;
+  _Sent via MrFresh.lk Checkout_
+    `;
 
-  const phoneNumber = "94767080553";
-  window.open(
-    `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`,
-    "_blank"
-  );
-};
-
+    const phoneNumber = "94767080553";
+    window.open(
+      `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`,
+      "_blank"
+    );
+  };
 
   /* ---------------- PLACE ORDER ---------------- */
   const placeOrder = async () => {
@@ -218,6 +217,12 @@ _Sent via MrFresh.lk Checkout_
 
       // ✅ SEND WHATSAPP AFTER SAVE
       openWhatsApp(orderId);
+
+      // ✅ LIVE CLEAR CART (IMMEDIATE)
+      localStorage.setItem("cartItems", JSON.stringify([]));
+
+      // ✅ FIRE EVENT (HEADER LISTENS TO THIS)
+      window.dispatchEvent(new Event("cartUpdated"));
 
 
      setSnack({
