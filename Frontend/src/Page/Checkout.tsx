@@ -252,7 +252,11 @@ export default function Checkout() {
         pt: 2,
         pb: 6,
         fontFamily: font,
-        "& *": { fontFamily: font },
+        color: "#000",              // ✅ FORCE BLACK TEXT
+        "& *": {
+          fontFamily: font,
+          color: "#000",            // ✅ ALL CHILD TEXT BLACK
+        },
       }}
     >
       {/* ================= HEADER ================= */}
@@ -754,7 +758,7 @@ export default function Checkout() {
             >
               Clear
             </Button>
-
++
             {isLoaded && (
               <GoogleMap
                 mapContainerStyle={MAP_CONTAINER_STYLE}
