@@ -130,50 +130,59 @@ export default function Checkout() {
 
   /* ---------------- WHATSAPP ---------------- */
     const openWhatsApp = (orderId: string) => {
-    const mapUrl =
-      coords && coords.lat && coords.lng
-        ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}`
-        : "Location not available";
+      const mapUrl =
+        coords?.lat && coords?.lng
+          ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}`
+          : "Location not available";
 
-    const orderNames = cartItems
-      .map(
-        (item: any) =>
-          `• ${item.name}${item.variant ? ` (${item.variant})` : ""} x ${item.qty}`
-      )
-      .join("\n");
+      const orderNames = cartItems
+        .map(
+          (item: any) =>
+            `• ${item.name}${
+              item.variant ? ` (${item.variant})` : ""
+            } x ${item.qty}`
+        )
+        .join("\n");
 
-    const message = `
-  *🛒 New Order Received*
+      // ✅ INVOICE / DETAILS PAGE LINK
+      const invoiceLink = `${window.location.origin}/order/${orderId}`;
 
-  *Name:* ${name || "N/A"}
-  *Mobile:* +94${whatsapp || "N/A"}
-  *Delivery Area:* ${location || "N/A"}
+      const message = `
+    🛒 *New Order Received*
 
-  *Address:*
-  ${street}, ${unit ? unit + "," : ""} ${city}
-  ${postal}
+    *Name:* ${name || "N/A"}
+    *Mobile:* +94${whatsapp || "N/A"}
+    *Delivery Area:* ${location || "N/A"}
 
-  *Order ID:* ${orderId}
+    *Address:*
+    ${street}, ${unit ? unit + "," : ""} ${city}
+    ${postal}
 
-  *Order Items:*
-  ${orderNames}
+    *Order ID:* ${orderId}
 
-  *Items Total:* LKR ${itemsTotal.toLocaleString()}
-  *Delivery:* LKR ${deliveryCharge.toLocaleString()}
-  *Grand Total:* LKR ${grandTotal.toLocaleString()}
+    *Order Items:*
+    ${orderNames}
 
-  📍 Map:
-  ${mapUrl}
+    *Items Total:* LKR ${itemsTotal.toLocaleString()}
+    *Delivery:* LKR ${deliveryCharge.toLocaleString()}
+    *Grand Total:* LKR ${grandTotal.toLocaleString()}
 
-  _Sent via MrFresh.lk Checkout_
+    📍 *Map Location:*
+    ${mapUrl}
+
+    📄 *Invoice / Order Details:*
+    ${invoiceLink}
+
+    _Sent via MrFresh.lk Checkout_
     `;
 
-    const phoneNumber = "94767080553";
-    window.open(
-      `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`,
-      "_blank"
-    );
-  };
+      const phoneNumber = "94767080553"; // ADMIN NUMBER
+
+      window.open(
+        `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`,
+        "_blank"
+      );
+    };
 
   /* ---------------- PLACE ORDER ---------------- */
   const placeOrder = async () => {
@@ -246,18 +255,18 @@ export default function Checkout() {
   return (
     <Box
       sx={{
-        maxWidth: 420,
-        mx: "auto",
-        bgcolor: "#F8FAFC",
-        pt: 2,
-        pb: 6,
+      maxWidth: 420,
+      mx: "auto",
+      bgcolor: "#F8FAFC",
+      pt: 2,
+      pb: 6,
+      fontFamily: font,
+      color: "#000",              // ✅ FORCE BLACK TEXT
+      "& *": {
         fontFamily: font,
-        color: "#000",              // ✅ FORCE BLACK TEXT
-        "& *": {
-          fontFamily: font,
-          color: "#000",            // ✅ ALL CHILD TEXT BLACK
-        },
-      }}
+        color: "#000",            // ✅ ALL CHILD TEXT BLACK
+      },
+    }}
     >
       {/* ================= HEADER ================= */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, p: 2 }}>

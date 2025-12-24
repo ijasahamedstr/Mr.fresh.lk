@@ -58,15 +58,19 @@ export const getAllOrders = async (req, res) => {
 /* ================= GET SINGLE ORDER ================= */
 export const getOrderById = async (req, res) => {
   try {
-    const order = await OrderModel.findById(req.params.id);
-    if (!order)
-      return res.status(404).json({ message: "Order not found" });
+    const { id } = req.params;
+    const order = await OrderModel.findById(id);
 
-    res.json(order);
-  } catch (error) {
-    res.status(500).json({ message: "Failed to fetch order" });
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.json(order); // ✅ return order data
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 };
+
 
 /* ================= UPDATE STATUS ================= */
 export const updateOrderStatus = async (req, res) => {
