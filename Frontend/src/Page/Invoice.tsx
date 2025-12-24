@@ -72,7 +72,7 @@ export default function Invoice() {
   };
 
   return (
-    <Box sx={{ pt: 4, pb: 6, px: 1.5, fontFamily: Montserrat }}>
+    <Box sx={{ pt: 4, pb: 6, px: 1.5, fontFamily: Montserrat, color: "#000",bgcolor: "#fff",}}>
       {/* ================= INVOICE CARD ================= */}
       <Box
         ref={invoiceRef}
