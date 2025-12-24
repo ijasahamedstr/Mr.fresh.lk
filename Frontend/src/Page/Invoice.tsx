@@ -112,10 +112,10 @@ export default function Invoice() {
           <Typography fontWeight={700} fontSize={18} sx={{fontFamily:Montserrat}}>
             Mr.Fresh.lk
           </Typography>
-          <Typography fontSize={12} color="#6b7280" sx={{fontFamily:Montserrat}}>
+          <Typography fontSize={12} sx={{fontFamily:Montserrat}}>
             take.app/mrfreshlk
           </Typography>
-          <Typography fontSize={12} color="#6b7280" sx={{fontFamily:Montserrat}}>
+          <Typography fontSize={12}  sx={{fontFamily:Montserrat}}>
             +94 76 708 0553
           </Typography>
         </Box>
@@ -163,7 +163,7 @@ export default function Invoice() {
                 <Typography fontSize={13} fontWeight={600}>
                   {item.name}
                 </Typography>
-                <Typography fontSize={12} color="#6b7280">
+                <Typography fontSize={12} >
                   {item.qty} × LKR {item.price.toLocaleString()}
                 </Typography>
               </Box>
@@ -190,14 +190,14 @@ export default function Invoice() {
           Order Details
         </Typography>
 
-        <Typography fontSize={12} color="#6b7280" sx={{fontFamily:Montserrat}}>
+        <Typography fontSize={12}  sx={{fontFamily:Montserrat}}>
           Customer
         </Typography>
         <Typography fontSize={13} mb={1} sx={{fontFamily:Montserrat}}>
           {order.customer.name} / {order.customer.whatsapp}
         </Typography>
 
-        <Typography fontSize={12} color="#6b7280" sx={{fontFamily:Montserrat}}>
+        <Typography fontSize={12}  sx={{fontFamily:Montserrat}}>
           Delivery Address
         </Typography>
         <Typography fontSize={13} sx={{fontFamily:Montserrat}}>
@@ -208,7 +208,7 @@ export default function Invoice() {
         </Typography>
 
         {/* ================= MAP ================= */}
-        <Typography fontSize={12} color="#6b7280" mb={0.5} sx={{fontFamily:Montserrat}}>
+        <Typography fontSize={12}  mb={0.5} sx={{fontFamily:Montserrat}}>
           Location
         </Typography>
 
