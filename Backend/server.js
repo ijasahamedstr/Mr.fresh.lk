@@ -1,0 +1,57 @@
+// Import required modules
+import express from "express";
+import connectDB from "./lib/db.js";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import Adminrouter from "./routes/AccountRegisterAdmin.route.js";
+import Slidersection from "./routes/Slidersection.route.js";
+import Categorysection from "./routes/Categories.route.js";
+import Productssection from "./routes/Product.routes.js";
+import Odersection from "./routes/Order.routes.js";
+import dns from 'node:dns';
+dns.setDefaultResultOrder('ipv4first');
+dns.setServers(['8.8.8.8', '1.1.1.1']);
+
+// Create an instance of Express
+const app = express();
+
+// Middlewares
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// CORS setup
+app.use(
+  cors({
+    origin: [
+      "https://mr-fresh-lk-admin.vercel.app",
+      "http://localhost:5173",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// Connect DB
+connectDB();
+
+// Default route
+app.get("/", (req, res) => {
+  res.send("Server is running");
+});
+
+//ADMIN -> MIDDLEWARE -> SERVER
+app.use('/api', Adminrouter);
+app.use('/Slidersection',Slidersection);
+app.use("/Categorysection", Categorysection);
+app.use("/Products",Productssection);
+app.use("/Productsoder",Odersection);
+
+
+
+// Start server
+const port = 8001;
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
