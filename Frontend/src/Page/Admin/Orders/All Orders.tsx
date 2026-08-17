@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { 
   Box, Typography, Stack, Paper, Table, TableBody, TableCell, 
   TableContainer, TableHead, TableRow, IconButton, Avatar, 
@@ -18,7 +18,6 @@ import {
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const CACHE_KEY = "ORDERS_MANAGEMENT_CACHE";
 const PRIMARY_TEAL = "#004652";
-const ACCENT_AMBER = "#F59E0B";
 
 const montserratTheme = createTheme({
   typography: {

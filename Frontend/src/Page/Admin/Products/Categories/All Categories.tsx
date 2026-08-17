@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, type ComponentType } from "react";
+import  { useCallback, useEffect, useState, type ComponentType } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 

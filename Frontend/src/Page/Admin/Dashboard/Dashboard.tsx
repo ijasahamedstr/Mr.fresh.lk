@@ -17,7 +17,7 @@ import {
   StorageOutlined,
   TranslateOutlined, PsychologyOutlined,
   Inventory2Outlined, CategoryOutlined, ContactSupportOutlined,
-  MiscellaneousServicesOutlined, ViewCarouselOutlined,
+  ViewCarouselOutlined,
   ShoppingCartOutlined, 
   PendingActionsOutlined, 
   CancelOutlined,

@@ -33,8 +33,7 @@ const Productpage: React.FC = () => {
    * - Special and popular sections are hidden
    * - Selected category products are shown
    */
-  const [selectedCategory, setSelectedCategory] =
-    useState<string>("");
+  useState<string>("");
 
   return (
     <Container
@@ -76,10 +75,7 @@ const Productpage: React.FC = () => {
 
       {/* CATEGORY SLIDER */}
 
-      <Categories
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-      />
+      <Categories />
 
       {/* PRODUCT AREA */}
 
@@ -94,7 +90,7 @@ const Productpage: React.FC = () => {
           color: "#000000",
         }}
       >
-        <Product selectedCategory={selectedCategory} />
+        <Product />
       </Box>
     </Container>
   );
