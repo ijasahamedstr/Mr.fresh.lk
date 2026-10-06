@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Stack, Paper, Divider } from "@mui/material";
+import { Box, Typography, Stack, Paper, Fade } from "@mui/material";
 import { 
   ArrowForward, 
   ViewCarouselOutlined, 
@@ -14,7 +14,8 @@ import {
   Diversity1Outlined, 
   HandshakeOutlined, 
   SettingsOutlined,
-  SchoolOutlined
+  SchoolOutlined,
+  Circle
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
@@ -52,10 +53,10 @@ const Overview = () => {
     partners: 0, 
     settings: "Active"
   });
+  const [loaded, setLoaded] = useState(false);
 
-  // THIS IS YOUR CONNECTION TO THE BACKEND / DATABASE
   useEffect(() => {
-    const apiHost = import.meta.env.VITE_API_URL || "http://localhost:5000"; // Fallback added for testing
+    const apiHost = import.meta.env.VITE_API_URL || "http://localhost:5000";
     const endpoints = {
       slider: "/api/sliders",
       registration: "/api/students",
@@ -71,19 +72,19 @@ const Overview = () => {
       partners: "/api/partners"
     };
 
-    Object.entries(endpoints).forEach(([key, url]) => {
+    const fetchPromises = Object.entries(endpoints).map(([key, url]) => 
       fetch(`${apiHost}${url}`)
         .then(res => res.json())
         .then(data => {
-          // Robust data length checking
           const val = data.success && Array.isArray(data.data) 
             ? data.data.length 
             : (Array.isArray(data) ? data.length : 0);
-          
           setCounts(prev => ({ ...prev, [key]: val }));
         })
-        .catch(err => console.error(`Error fetching ${key}:`, err));
-    });
+        .catch(err => console.error(`Error fetching ${key}:`, err))
+    );
+
+    Promise.all(fetchPromises).finally(() => setLoaded(true));
   }, []);
 
   const services = [
@@ -102,7 +103,6 @@ const Overview = () => {
     { id: "settings", title: "Settings", count: "Active", icon: <SettingsOutlined />, color: "#64748B" }
   ];
 
-  // Prepare data for the Graph (Exclude "Settings" since it's just "Active")
   const chartData = services
     .filter(s => s.id !== "settings")
     .map(s => ({
@@ -112,182 +112,225 @@ const Overview = () => {
     }));
 
   return (
-    <Box sx={{ 
-      direction: "ltr", 
-      width: "100%", 
-      p: { xs: 2, md: 4 }, 
-      bgcolor: "#F8FAFC",
-      minHeight: "100vh" 
-    }}>
+    <Box 
+      sx={{ 
+        direction: "ltr", 
+        width: "100%",
+        flexGrow: 1,
+        mt: "0px",
+        maxWidth: "1600px",
+        mx: "auto"
+      }}
+    >
       {/* Header Section */}
-      <Box sx={{ mb: 6 }}>
-        <Typography 
-          variant="h3" 
-          fontWeight={800} 
-          color={primaryTeal} 
-          sx={{ fontFamily: primaryFont, letterSpacing: "-1px" }}
-        >
-          Dashboard
-        </Typography>
-        <Typography 
-          variant="body1" 
-          color="text.secondary" 
-          sx={{ fontFamily: primaryFont, mt: 1 }}
-        >
-          Real-time metrics across all system modules.
-        </Typography>
-      </Box>
+      <Stack 
+        direction={{ xs: "column", sm: "row" }} 
+        justifyContent="space-between" 
+        alignItems={{ xs: "flex-start", sm: "center" }}
+        mb={3}
+        spacing={2}
+      >
+        <Box>
+          <Typography 
+            variant="h3" 
+            fontWeight={800} 
+            color={primaryTeal} 
+            sx={{ fontFamily: primaryFont, letterSpacing: "-1.5px", mb: 0.5 }}
+          >
+            Overview
+          </Typography>
+          <Typography 
+            variant="body1" 
+            color="text.secondary" 
+            sx={{ fontFamily: primaryFont, fontWeight: 500 }}
+          >
+            Real-time metrics across all system modules.
+          </Typography>
+        </Box>
+
+        {/* Live Status Badge */}
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 1, 
+          bgcolor: '#FFFFFF', 
+          px: 2, 
+          py: 1, 
+          borderRadius: '20px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
+        }}>
+          <Circle sx={{ 
+            color: '#10B981', 
+            fontSize: '10px',
+            animation: 'pulse 2s infinite',
+            '@keyframes pulse': {
+              '0%': { transform: 'scale(0.95)', opacity: 0.5 },
+              '50%': { transform: 'scale(1.2)', opacity: 1 },
+              '100%': { transform: 'scale(0.95)', opacity: 0.5 },
+            }
+          }}/>
+          <Typography variant="caption" fontWeight={700} color="text.secondary">
+            SYSTEM LIVE
+          </Typography>
+        </Box>
+      </Stack>
 
       {/* Grid Layout for Cards */}
       <Box 
         sx={{ 
-          display: "flex", 
-          flexWrap: "wrap", 
-          gap: "20px", 
-          justifyContent: "flex-start",
-          mb: 6 // Added margin below cards
+          display: "grid", 
+          gridTemplateColumns: {
+            xs: "1fr",
+            sm: "repeat(2, 1fr)",
+            md: "repeat(3, 1fr)",
+            lg: "repeat(4, 1fr)",
+            xl: "repeat(5, 1fr)"
+          },
+          gap: 3, 
+          mb: 6 
         }}
       >
-        {services.map((s) => (
-          <Box 
-            key={s.id}
-            sx={{ 
-              width: {
-                xs: "100%",                  
-                sm: "calc(50% - 10px)",          
-                md: "calc(33.33% - 14px)",       
-                lg: "calc(20% - 16px)"           
-              },
-              flexGrow: 0,
-              flexShrink: 0
-            }}
-          >
+        {services.map((s, index) => (
+          <Fade in={loaded || true} timeout={(index + 1) * 200} key={s.id}>
             <Paper
               elevation={0}
               onClick={() => navigate(`/service-detail/${s.id}`)}
               sx={{
                 p: 3,
-                height: "100%",
-                borderRadius: "20px",
-                border: "1px solid #E2E8F0",
+                borderRadius: "24px",
                 bgcolor: "#FFFFFF",
                 cursor: "pointer",
+                position: "relative",
+                overflow: "hidden",
+                border: "1px solid rgba(226, 232, 240, 0.6)",
+                boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.02)",
                 transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "space-between",
                 "&:hover": {
-                  borderColor: s.color,
-                  boxShadow: `0 12px 24px -10px ${s.color}40`,
-                  transform: "translateY(-5px)",
+                  boxShadow: `0 20px 40px -10px ${s.color}30`,
+                  transform: "translateY(-6px)",
+                  borderColor: `${s.color}40`,
                   "& .arrow-icon": { 
                     transform: "translateX(4px)", 
                     color: s.color 
+                  },
+                  "& .icon-wrapper": {
+                    bgcolor: s.color,
+                    color: "#FFF"
                   }
                 }
               }}
             >
-              <Box>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={4}>
-                  <Box 
-                    sx={{ 
-                      p: 1.5, 
-                      borderRadius: "12px", 
-                      bgcolor: `${s.color}10`, 
-                      color: s.color,
-                      display: "flex"
-                    }}
-                  >
-                    {React.cloneElement(s.icon, { sx: { fontSize: 28 } })}
-                  </Box>
-                  <ArrowForward className="arrow-icon" sx={{ fontSize: 20, color: "#CBD5E1", transition: "0.3s" }} />
-                </Stack>
+              {/* Top Row: Icon & Arrow */}
+              <Stack direction="row" justifyContent="space-between" alignItems="center" mb={4}>
+                <Box 
+                  className="icon-wrapper"
+                  sx={{ 
+                    p: 1.5, 
+                    borderRadius: "14px", 
+                    bgcolor: `${s.color}15`, 
+                    color: s.color,
+                    display: "flex",
+                    transition: "all 0.3s ease"
+                  }}
+                >
+                  {React.cloneElement(s.icon, { sx: { fontSize: 26 } })}
+                </Box>
+                <ArrowForward className="arrow-icon" sx={{ fontSize: 20, color: "#CBD5E1", transition: "0.3s" }} />
+              </Stack>
 
+              {/* Bottom Row: Number & Title */}
+              <Box>
                 <Typography 
-                  variant="body2" 
+                  variant="h3" 
+                  fontWeight={800} 
+                  color="text.primary" 
+                  sx={{ fontFamily: primaryFont, lineHeight: 1 }}
+                >
+                  {s.count}
+                </Typography>
+                <Typography 
+                  variant="caption" 
                   fontWeight={700} 
                   color="text.secondary" 
                   sx={{ 
                     fontFamily: primaryFont,
                     textTransform: "uppercase", 
-                    letterSpacing: "1px", 
-                    mb: 0.5, 
-                    fontSize: "0.7rem" 
+                    letterSpacing: "1.2px", 
+                    display: "block",
+                    mt: 1.5,
+                    fontSize: "0.7rem"
                   }}
                 >
                   {s.title}
                 </Typography>
-                
-                <Typography 
-                  variant="h4" 
-                  fontWeight={800} 
-                  color={primaryTeal} 
-                  sx={{ fontFamily: primaryFont }}
-                >
-                  {s.count}
-                </Typography>
-              </Box>
-
-              <Box sx={{ mt: 3 }}>
-                <Divider sx={{ mb: 2, opacity: 0.6 }} />
-                <Typography 
-                  variant="caption" 
-                  color="text.disabled" 
-                  fontWeight={600} 
-                  sx={{ fontFamily: primaryFont }}
-                >
-                  TOTAL RECORDS
-                </Typography>
               </Box>
             </Paper>
-          </Box>
+          </Fade>
         ))}
       </Box>
 
-      {/* NEW: Graph Section */}
+      {/* Graph Section */}
       <Paper 
         elevation={0} 
         sx={{ 
-          p: 4, 
-          borderRadius: "20px", 
-          border: "1px solid #E2E8F0",
+          p: { xs: 3, md: 4 }, 
+          borderRadius: "24px", 
+          border: "1px solid rgba(226, 232, 240, 0.6)",
+          boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.02)",
           bgcolor: "#FFFFFF" 
         }}
       >
         <Typography 
           variant="h6" 
-          fontWeight={700} 
+          fontWeight={800} 
           color={primaryTeal} 
-          sx={{ fontFamily: primaryFont, mb: 4 }}
+          sx={{ fontFamily: primaryFont, mb: 1 }}
         >
-          System Overview Graph
+          System Analytics
+        </Typography>
+        <Typography 
+          variant="body2" 
+          color="text.secondary" 
+          sx={{ fontFamily: primaryFont, mb: 5 }}
+        >
+          Distribution of records across active modules
         </Typography>
         
-        <Box sx={{ width: '100%', height: 400 }}>
+        <Box sx={{ width: '100%', height: 420 }}>
           <ResponsiveContainer>
             <BarChart
               data={chartData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+              margin={{ top: 20, right: 10, left: -20, bottom: 60 }}
             >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
               <XAxis 
                 dataKey="name" 
                 axisLine={false} 
                 tickLine={false} 
-                tick={{ fill: '#64748B', fontSize: 12 }} 
+                tick={{ fill: '#94A3B8', fontSize: 12, fontWeight: 600, fontFamily: primaryFont }} 
                 angle={-45} 
                 textAnchor="end"
+                dy={10}
               />
               <YAxis 
                 axisLine={false} 
                 tickLine={false} 
-                tick={{ fill: '#64748B', fontSize: 12 }}
+                tick={{ fill: '#94A3B8', fontSize: 12, fontWeight: 600, fontFamily: primaryFont }}
               />
               <Tooltip 
                 cursor={{ fill: '#F8FAFC' }}
-                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                contentStyle={{ 
+                  borderRadius: '16px', 
+                  border: 'none', 
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                  fontFamily: primaryFont,
+                  fontWeight: 600
+                }}
+                itemStyle={{ color: primaryTeal }}
               />
-              <Bar dataKey="Total" radius={[4, 4, 0, 0]}>
+              <Bar dataKey="Total" radius={[8, 8, 0, 0]} maxBarSize={50}>
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
@@ -296,7 +339,6 @@ const Overview = () => {
           </ResponsiveContainer>
         </Box>
       </Paper>
-
     </Box>
   );
 };

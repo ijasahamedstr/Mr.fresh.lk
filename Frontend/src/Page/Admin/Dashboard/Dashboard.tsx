@@ -8,20 +8,12 @@ import {
   Snackbar, Alert, Tab, Tabs
 } from "@mui/material";
 import { 
-  DashboardOutlined, ExpandLess, ExpandMore,SupportAgentOutlined,SettingsOutlined, 
-  LogoutOutlined, MenuOpen, ArrowForwardIos,
-  NotificationsActiveOutlined,ChevronRight,
-  AdminPanelSettingsOutlined,
-  KeyboardArrowDownOutlined,
-  CloudDoneOutlined, SecurityOutlined, SpeedOutlined,
-  StorageOutlined,
-  TranslateOutlined, PsychologyOutlined,
-  Inventory2Outlined, CategoryOutlined, ContactSupportOutlined,
-  ViewCarouselOutlined,
-  ShoppingCartOutlined, 
-  PendingActionsOutlined, 
-  CancelOutlined,
-  ManageAccountsOutlined
+  DashboardOutlined, ExpandLess, ExpandMore, SupportAgentOutlined, SettingsOutlined, 
+  LogoutOutlined, MenuOpen, ArrowForwardIos, NotificationsActiveOutlined, ChevronRight,
+  AdminPanelSettingsOutlined, KeyboardArrowDownOutlined, CloudDoneOutlined, SecurityOutlined, 
+  SpeedOutlined, StorageOutlined, PsychologyOutlined, Inventory2Outlined, 
+  CategoryOutlined, ContactSupportOutlined, ViewCarouselOutlined, ShoppingCartOutlined, 
+  PendingActionsOutlined, CancelOutlined, ManageAccountsOutlined
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
@@ -33,12 +25,12 @@ import NewProductsCreate from "../Products/All Products/New Products Create";
 import AllOrders from "../Orders/All Orders";
 import AllCategories from "../Products/Categories/All Categories";
 
-// CONSTANTS
+// CONSTANTS - Refined Palette
 const DRAWER_WIDTH = 290;
 const PRIMARY_TEAL = "#004652";
-const ACCENT_GOLD = "#CC9D2F";
+const ACCENT_GOLD = "#D4AF37";
 const PRIMARY_FONT = "'Montserrat', sans-serif";
-const LOGO_URL = "https://i.ibb.co/6RkH7J3r/Small-scaled.webp";
+const LOGO_URL = "https://i.ibb.co/gMKsF5Fd/image-1.webp";
 
 // TYPES
 interface NavItem {
@@ -49,8 +41,6 @@ interface NavItem {
   children?: NavItem[];
 }
 
-// FIX: Cast components to React.FC<any> to resolve strict Prop type mismatches 
-// (Resolves both IntrinsicAttributes error and missing onBack prop error)
 const TypedAccountCreate = AccountCreate as React.FC<any>;
 const TypedNewProductsCreate = NewProductsCreate as React.FC<any>;
 
@@ -59,7 +49,7 @@ const Dashboard: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  // --- EXTENDED STATE ---
+  // STATE
   const [activeTab, setActiveTab] = useState("Dashboard");
   const [activeSubTab, setActiveSubTab] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -78,7 +68,7 @@ const Dashboard: React.FC = () => {
     lastLogin: new Date().toLocaleString()
   });
 
-  // --- INITIALIZATION ---
+  // INITIALIZATION
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 400);
     const savedData = localStorage.getItem("adminData");
@@ -88,7 +78,7 @@ const Dashboard: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // --- HANDLERS ---
+  // HANDLERS
   const handleProfileMenu = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
   const handleCloseProfile = () => setAnchorEl(null);
   
@@ -98,13 +88,20 @@ const Dashboard: React.FC = () => {
     navigate("/login");
   };
 
-  const handleNavigation = (text: string) => {
+  const handleNavigation = (text: string, parentMenuName: string | null = null) => {
     setActiveTab(text);
+    
+    if (parentMenuName) {
+      setOpenSubmenu(parentMenuName);
+    } else {
+      setOpenSubmenu(null);
+    }
+    
     if (isMobile) setMobileOpen(false);
     setSnackbarOpen(true); 
   };
 
-  // --- NAVIGATION CONFIG ---
+  // NAVIGATION CONFIG
   const NAVIGATION_MAP: NavItem[] = useMemo(() => [
     { text: "Dashboard", icon: <DashboardOutlined /> },
     { 
@@ -133,17 +130,36 @@ const Dashboard: React.FC = () => {
     { text: "Account Create", icon: <SettingsOutlined />, path: "Settings" },
   ], []);
 
-  // --- MODULE RENDERING LOGIC ---
+  // MODULE WRAPPER
   const ModuleWrapper = ({ title, subtitle, children }: { title: string, subtitle: string, children: React.ReactNode }) => (
     <Box sx={{ p: { xs: 1, md: 2 } }}>
       <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ sm: "center" }} mb={4} spacing={2}>
         <Box>
-          <Typography variant="h4" sx={{ fontFamily: PRIMARY_FONT, fontWeight: 900, color: PRIMARY_TEAL, letterSpacing: "-1px" }}>{title}</Typography>
-          <Typography variant="body2" sx={{ color: '#64748B', fontWeight: 500 }}>{subtitle}</Typography>
+          <Typography variant="h4" sx={{ fontFamily: PRIMARY_FONT, fontWeight: 900, color: PRIMARY_TEAL, letterSpacing: "-0.5px" }}>{title}</Typography>
+          <Typography variant="body2" sx={{ color: '#64748B', fontWeight: 500, mt: 0.5 }}>{subtitle}</Typography>
         </Box>
         <Stack direction="row" spacing={1.5}>
-          <Button variant="outlined" sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 700, borderColor: "#E2E8F0", color: "#64748B" }}>Export</Button>
-          <Button variant="contained" sx={{ bgcolor: PRIMARY_TEAL, borderRadius: "10px", textTransform: "none", fontWeight: 700, px: 3 }}>Add New</Button>
+          <Button 
+            variant="outlined" 
+            sx={{ 
+              borderRadius: "12px", textTransform: "none", fontWeight: 700, 
+              borderColor: "#E2E8F0", color: "#64748B", transition: "all 0.2s",
+              "&:hover": { borderColor: PRIMARY_TEAL, color: PRIMARY_TEAL, transform: "translateY(-2px)" }
+            }}
+          >
+            Export
+          </Button>
+          <Button 
+            variant="contained" 
+            sx={{ 
+              bgcolor: PRIMARY_TEAL, borderRadius: "12px", textTransform: "none", 
+              fontWeight: 700, px: 3, boxShadow: "0 8px 16px rgba(0,70,82,0.2)",
+              transition: "all 0.2s",
+              "&:hover": { bgcolor: "#00353e", transform: "translateY(-2px)", boxShadow: "0 12px 20px rgba(0,70,82,0.3)" }
+            }}
+          >
+            Add New
+          </Button>
         </Stack>
       </Stack>
       {children}
@@ -153,13 +169,9 @@ const Dashboard: React.FC = () => {
   const ActiveContent = () => {
     switch (activeTab) {
       case "Dashboard": return <Overview />;
-      
-      // FIX: Using typed components and passing required onBack props to both
       case "Account Create": return <TypedAccountCreate onBack={() => setActiveTab("Dashboard")} />;
       case "Add New Product": return <TypedNewProductsCreate onBack={() => setActiveTab("All Products")} />;
-      
       case "All Products": return <AllProducts />;
-      
       case "Customer Account":
       case "Categories": return <AllCategories />
       case "All Orders": return <AllOrders />
@@ -171,16 +183,20 @@ const Dashboard: React.FC = () => {
       case "Slider Section":
         return (
           <ModuleWrapper title={`${activeTab} Management`} subtitle={`Configure and manage university ${activeTab.toLowerCase()} records.`}>
-            <Tabs value={activeSubTab} onChange={(_, v) => setActiveSubTab(v)} sx={{ mb: 3, borderBottom: "1px solid #E2E8F0" }}>
-              <Tab label="Overview" sx={{ fontFamily: PRIMARY_FONT, fontWeight: 700, textTransform: "none" }} />
-              <Tab label="Active" sx={{ fontFamily: PRIMARY_FONT, fontWeight: 700, textTransform: "none" }} />
-              <Tab label="Archived" sx={{ fontFamily: PRIMARY_FONT, fontWeight: 700, textTransform: "none" }} />
+            <Tabs 
+              value={activeSubTab} 
+              onChange={(_, v) => setActiveSubTab(v)} 
+              sx={{ mb: 4, borderBottom: "1px solid #E2E8F0", "& .MuiTabs-indicator": { backgroundColor: PRIMARY_TEAL, height: 3, borderTopLeftRadius: 3, borderTopRightRadius: 3 } }}
+            >
+              <Tab label="Overview" sx={{ fontFamily: PRIMARY_FONT, fontWeight: 700, textTransform: "none", color: "#64748B", "&.Mui-selected": { color: PRIMARY_TEAL } }} />
+              <Tab label="Active" sx={{ fontFamily: PRIMARY_FONT, fontWeight: 700, textTransform: "none", color: "#64748B", "&.Mui-selected": { color: PRIMARY_TEAL } }} />
+              <Tab label="Archived" sx={{ fontFamily: PRIMARY_FONT, fontWeight: 700, textTransform: "none", color: "#64748B", "&.Mui-selected": { color: PRIMARY_TEAL } }} />
             </Tabs>
-            <Paper variant="outlined" sx={{ p: { xs: 5, md: 10 }, textAlign: 'center', borderRadius: '24px', borderStyle: 'dashed', bgcolor: '#F8FAFC' }}>
+            <Paper variant="outlined" sx={{ p: { xs: 5, md: 10 }, textAlign: 'center', borderRadius: '24px', borderStyle: 'dashed', borderColor: '#CBD5E1', bgcolor: '#F8FAFC', transition: 'all 0.3s', "&:hover": { borderColor: PRIMARY_TEAL, bgcolor: 'white' } }}>
               <Typography variant="h6" sx={{ fontFamily: PRIMARY_FONT, fontWeight: 800, color: PRIMARY_TEAL, mb: 1 }}>
                 {activeTab} Module
               </Typography>
-              <Typography sx={{ fontFamily: PRIMARY_FONT, fontWeight: 600, color: '#94A3B8' }}>
+              <Typography sx={{ fontFamily: PRIMARY_FONT, fontWeight: 500, color: '#94A3B8' }}>
                 Add your {activeTab.toLowerCase()} form, table, API data, or management component here.
               </Typography>
             </Paper>
@@ -198,64 +214,80 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // --- SIDEBAR COMPONENT ---
+  // SIDEBAR COMPONENT
   const Sidebar = (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column", bgcolor: PRIMARY_TEAL, color: "white" }}>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column", background: `linear-gradient(180deg, ${PRIMARY_TEAL} 0%, #001f24 100%)`, color: "white" }}>
       <Box sx={{ p: 4, textAlign: "center" }}>
-        <Paper elevation={0} sx={{ p: 2, borderRadius: '20px', bgcolor: 'white' }}>
+        <Paper elevation={0} sx={{ p: 2, borderRadius: '20px', bgcolor: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
           <Box component="img" src={LOGO_URL} sx={{ width: "100%", maxWidth: 150 }} />
         </Paper>
       </Box>
 
-      <List sx={{ px: 2, flexGrow: 1, overflowY: 'auto', '&::-webkit-scrollbar': { width: 4 }, '&::-webkit-scrollbar-thumb': { bgcolor: 'rgba(255,255,255,0.1)' } }}>
-        {NAVIGATION_MAP.map((item) => (
-          <React.Fragment key={item.text}>
-            <ListItemButton 
-              onClick={() => item.isNested ? setOpenSubmenu(openSubmenu === item.text ? null : item.text) : handleNavigation(item.text)} 
-              sx={{ 
-                borderRadius: "14px", mb: 0.8, py: 1.5,
-                bgcolor: activeTab === item.text || openSubmenu === item.text ? "rgba(255,255,255,0.12)" : "transparent",
-                "&:hover": { bgcolor: "rgba(255,255,255,0.08)" }
-              }}
-            >
-              <ListItemIcon sx={{ color: activeTab === item.text ? ACCENT_GOLD : "white", minWidth: 42 }}>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} primaryTypographyProps={{ fontFamily: PRIMARY_FONT, fontWeight: 700, fontSize: '0.85rem' }} />
-              {item.isNested ? (openSubmenu === item.text ? <ExpandLess /> : <ExpandMore />) : (activeTab === item.text && <ArrowForwardIos sx={{ fontSize: 10, color: ACCENT_GOLD }} />)}
-            </ListItemButton>
+      <List sx={{ px: 2, flexGrow: 1, overflowY: 'auto', '&::-webkit-scrollbar': { width: 4 }, '&::-webkit-scrollbar-thumb': { bgcolor: 'rgba(255,255,255,0.1)', borderRadius: '4px' } }}>
+        {NAVIGATION_MAP.map((item) => {
+          const isChildActive = item.children?.some(c => c.text === activeTab);
+          const isActive = activeTab === item.text || openSubmenu === item.text || isChildActive;
 
-            {item.isNested && item.children && (
-              <Collapse in={openSubmenu === item.text} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding sx={{ mb: 1 }}>
-                  {item.children.map((child) => (
-                    <ListItemButton
-                      key={child.text} onClick={() => handleNavigation(child.text)}
-                      sx={{ 
-                        pl: 7, py: 1.2, borderRadius: "12px", mx: 1, mb: 0.3,
-                        bgcolor: activeTab === child.text ? "rgba(204, 157, 47, 0.15)" : "transparent",
-                      }}
-                    >
-                      <ListItemText 
-                        primary={child.text} 
-                        primaryTypographyProps={{ fontFamily: PRIMARY_FONT, fontSize: '0.8rem', fontWeight: 600, color: activeTab === child.text ? ACCENT_GOLD : "rgba(255,255,255,0.5)" }} 
-                      />
-                    </ListItemButton>
-                  ))}
-                </List>
-              </Collapse>
-            )}
-          </React.Fragment>
-        ))}
+          return (
+            <React.Fragment key={item.text}>
+              <ListItemButton 
+                onClick={() => {
+                  if (item.isNested) {
+                    setOpenSubmenu(openSubmenu === item.text ? null : item.text);
+                  } else {
+                    handleNavigation(item.text, null);
+                  }
+                }} 
+                sx={{ 
+                  borderRadius: "12px", mb: 0.8, py: 1.5,
+                  bgcolor: isActive ? "rgba(255,255,255,0.1)" : "transparent",
+                  borderLeft: isActive ? `4px solid ${ACCENT_GOLD}` : "4px solid transparent",
+                  transition: "all 0.3s ease",
+                  "&:hover": { bgcolor: "rgba(255,255,255,0.15)", transform: "translateX(4px)" }
+                }}
+              >
+                <ListItemIcon sx={{ color: isActive ? ACCENT_GOLD : "rgba(255,255,255,0.7)", minWidth: 42, transition: 'color 0.3s' }}>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.text} primaryTypographyProps={{ fontFamily: PRIMARY_FONT, fontWeight: isActive ? 700 : 500, fontSize: '0.9rem', color: isActive ? '#fff' : 'rgba(255,255,255,0.8)' }} />
+                {item.isNested ? (openSubmenu === item.text ? <ExpandLess sx={{ color: 'rgba(255,255,255,0.5)' }} /> : <ExpandMore sx={{ color: 'rgba(255,255,255,0.5)' }} />) : (isActive && <ArrowForwardIos sx={{ fontSize: 10, color: ACCENT_GOLD }} />)}
+              </ListItemButton>
+
+              {item.isNested && item.children && (
+                <Collapse in={openSubmenu === item.text} timeout="auto" unmountOnExit>
+                  <List component="div" disablePadding sx={{ mb: 1 }}>
+                    {item.children.map((child) => (
+                      <ListItemButton
+                        key={child.text} 
+                        onClick={() => handleNavigation(child.text, item.text)} 
+                        sx={{ 
+                          pl: 7, py: 1.2, borderRadius: "12px", mx: 1, mb: 0.3,
+                          bgcolor: activeTab === child.text ? "rgba(212, 175, 55, 0.1)" : "transparent",
+                          transition: "all 0.2s ease",
+                          "&:hover": { bgcolor: "rgba(255,255,255,0.08)" }
+                        }}
+                      >
+                        <ListItemText 
+                          primary={child.text} 
+                          primaryTypographyProps={{ fontFamily: PRIMARY_FONT, fontSize: '0.85rem', fontWeight: activeTab === child.text ? 700 : 500, color: activeTab === child.text ? ACCENT_GOLD : "rgba(255,255,255,0.6)" }} 
+                        />
+                      </ListItemButton>
+                    ))}
+                  </List>
+                </Collapse>
+              )}
+            </React.Fragment>
+          );
+        })}
       </List>
       
-      <Box sx={{ p: 3, bgcolor: 'rgba(0,0,0,0.15)' }}>
+      <Box sx={{ p: 3, bgcolor: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(10px)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
         <Stack direction="row" alignItems="center" spacing={2} mb={2}>
           <CloudDoneOutlined sx={{ fontSize: 18, color: '#10B981' }} />
-          <Typography sx={{ fontSize: '0.7rem', fontWeight: 700, color: '#10B981' }}>SYSTEM SECURE & SYNCED</Typography>
+          <Typography sx={{ fontSize: '0.7rem', fontWeight: 700, color: '#10B981', letterSpacing: '0.5px', fontFamily: PRIMARY_FONT }}>SYSTEM SECURE & SYNCED</Typography>
         </Stack>
         <Button 
           fullWidth variant="contained" startIcon={<LogoutOutlined />} 
           onClick={() => setLogoutDialogOpen(true)}
-          sx={{ bgcolor: 'rgba(255,142,142,0.1)', color: '#FF8E8E', fontWeight: 800, textTransform: 'none', borderRadius: '12px', "&:hover": { bgcolor: 'rgba(255,142,142,0.2)' } }}
+          sx={{ bgcolor: 'rgba(255,142,142,0.1)', color: '#FF8E8E', fontWeight: 700, textTransform: 'none', borderRadius: '12px', boxShadow: 'none', "&:hover": { bgcolor: 'rgba(255,142,142,0.25)', boxShadow: 'none', fontFamily: PRIMARY_FONT } }}
         >
           Sign Out
         </Button>
@@ -264,34 +296,40 @@ const Dashboard: React.FC = () => {
   );
 
   return (
-    <Box sx={{ display: "flex", bgcolor: "#F4F7F9", minHeight: "100vh" }}>
+    <Box sx={{ display: "flex", bgcolor: "#F8FAFC", minHeight: "100vh" }}>
       {/* HEADERBAR */}
-      <AppBar position="fixed" elevation={0} sx={{ width: { md: `calc(100% - ${DRAWER_WIDTH}px)` }, ml: { md: `${DRAWER_WIDTH}px` }, bgcolor: "rgba(255,255,255,0.95)", backdropFilter: "blur(8px)", borderBottom: "1px solid #E2E8F0", zIndex: 1201 }}>
-        <Toolbar sx={{ height: 90, px: 4, justifyContent: "space-between" }}>
+      <AppBar position="fixed" elevation={0} sx={{ width: { md: `calc(100% - ${DRAWER_WIDTH}px)` }, ml: { md: `${DRAWER_WIDTH}px` }, bgcolor: "rgba(255, 255, 255, 0.85)", backdropFilter: "blur(16px)", borderBottom: "1px solid rgba(226, 232, 240, 0.8)", boxShadow: "0 4px 30px rgba(0, 0, 0, 0.03)", zIndex: 1201 }}>
+        <Toolbar sx={{ height: 90, px: { xs: 2, md: 5 }, justifyContent: "space-between" }}>
           <Stack direction="row" alignItems="center" spacing={2}>
             {isMobile && <IconButton onClick={() => setMobileOpen(true)} sx={{ color: PRIMARY_TEAL }}><MenuOpen /></IconButton>}
             <Box>
               <Breadcrumbs separator={<ChevronRight fontSize="small" sx={{ color: '#94A3B8' }} />}>
-                <Link underline="hover" color="#94A3B8" sx={{ fontSize: '0.75rem', fontWeight: 700, fontFamily: PRIMARY_FONT }}>ADMIN</Link>
+                <Link underline="hover" color="#94A3B8" sx={{ fontSize: '0.75rem', fontWeight: 700, fontFamily: PRIMARY_FONT, cursor: 'pointer' }}>ADMIN</Link>
                 <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, fontFamily: PRIMARY_FONT, color: ACCENT_GOLD }}>{activeTab.toUpperCase()}</Typography>
               </Breadcrumbs>
-              <Typography variant="h5" sx={{ fontWeight: 900, color: PRIMARY_TEAL, fontFamily: PRIMARY_FONT }}>{activeTab}</Typography>
+              <Typography variant="h5" sx={{ fontWeight: 900, color: PRIMARY_TEAL, fontFamily: PRIMARY_FONT, letterSpacing: '-0.5px' }}>{activeTab}</Typography>
             </Box>
           </Stack>
 
-          <Stack direction="row" alignItems="center" spacing={2.5}>
-            <Tooltip title="Help Center"><IconButton sx={{ bgcolor: '#F1F5F9' }}><SupportAgentOutlined sx={{ color: '#64748B', fontSize: 20 }} /></IconButton></Tooltip>
-            <Tooltip title="Notifications">
-              <IconButton onClick={() => setNotificationCount(0)} sx={{ bgcolor: '#F1F5F9' }}>
-                <Badge badgeContent={notificationCount} color="error"><NotificationsActiveOutlined sx={{ color: '#64748B', fontSize: 20 }} /></Badge>
+          <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Tooltip title="Help Center">
+              <IconButton sx={{ bgcolor: '#F1F5F9', transition: 'all 0.2s', '&:hover': { bgcolor: '#E2E8F0', transform: 'scale(1.05)' } }}>
+                <SupportAgentOutlined sx={{ color: '#475569', fontSize: 22 }} />
               </IconButton>
             </Tooltip>
-            <Divider orientation="vertical" flexItem sx={{ height: 35, my: 'auto' }} />
-            <Box onClick={handleProfileMenu} sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 1.5, p: 0.8, borderRadius: '50px', transition: '0.2s', "&:hover": { bgcolor: '#F1F5F9' } }}>
-              <Avatar src={userData.profileImage} sx={{ width: 44, height: 44, border: `2px solid ${ACCENT_GOLD}` }} />
+            <Tooltip title="Notifications">
+              <IconButton onClick={() => setNotificationCount(0)} sx={{ bgcolor: '#F1F5F9', transition: 'all 0.2s', '&:hover': { bgcolor: '#E2E8F0', transform: 'scale(1.05)' } }}>
+                <Badge badgeContent={notificationCount} color="error" sx={{ '& .MuiBadge-badge': { fontWeight: 700 } }}>
+                  <NotificationsActiveOutlined sx={{ color: '#475569', fontSize: 22 }} />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+            <Divider orientation="vertical" flexItem sx={{ height: 35, my: 'auto', mx: 1 }} />
+            <Box onClick={handleProfileMenu} sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 1.5, p: 0.8, borderRadius: '50px', transition: 'all 0.2s', "&:hover": { bgcolor: '#F1F5F9' } }}>
+              <Avatar src={userData.profileImage} sx={{ width: 44, height: 44, border: `2px solid ${ACCENT_GOLD}`, boxShadow: '0 4px 10px rgba(212,175,55,0.3)' }} />
               <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-                <Typography sx={{ fontWeight: 800, fontSize: '0.85rem', color: PRIMARY_TEAL, fontFamily: PRIMARY_FONT }}>{userData.name}</Typography>
-                <Typography sx={{ fontSize: '0.65rem', color: '#10B981', fontWeight: 700 }}>● {userData.role}</Typography>
+                <Typography sx={{ fontWeight: 800, fontSize: '0.9rem', color: PRIMARY_TEAL, fontFamily: PRIMARY_FONT }}>{userData.name}</Typography>
+                <Typography sx={{ fontSize: '0.7rem', color: '#10B981', fontWeight: 700 }}>● {userData.role}</Typography>
               </Box>
               <KeyboardArrowDownOutlined sx={{ color: '#64748B' }} />
             </Box>
@@ -301,31 +339,31 @@ const Dashboard: React.FC = () => {
 
       {/* DRAWER */}
       <Box component="nav" sx={{ width: { md: DRAWER_WIDTH }, flexShrink: 0 }}>
-        <Drawer variant={isMobile ? "temporary" : "permanent"} open={isMobile ? mobileOpen : true} onClose={() => setMobileOpen(false)} sx={{ "& .MuiDrawer-paper": { width: DRAWER_WIDTH, border: "none", boxShadow: "15px 0 35px rgba(0,0,0,0.03)" } }}>
+        <Drawer variant={isMobile ? "temporary" : "permanent"} open={isMobile ? mobileOpen : true} onClose={() => setMobileOpen(false)} sx={{ "& .MuiDrawer-paper": { width: DRAWER_WIDTH, border: "none", boxShadow: "4px 0 24px rgba(0,0,0,0.06)" } }}>
           {Sidebar}
         </Drawer>
       </Box>
 
       {/* MAIN VIEWPORT */}
-      <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, md: 4 }, mt: "90px" }}>
-        <Fade in={isLoaded} timeout={600}>
+      <Box component="main" sx={{ flexGrow: 1, px: { xs: 2, md: 5 }, pb: { xs: 2, md: 5 }, pt: { xs: 0, md: 0 }, mt: "90px", maxWidth: '1600px', mx: 'auto', width: '100%' }}>
+        <Fade in={isLoaded} timeout={800}>
           <Box>
-            <Paper elevation={0} sx={{ p: { xs: 2, md: 5 }, borderRadius: '32px', minHeight: '80vh', border: '1px solid #E2E8F0', bgcolor: 'white' }}>
+            <Paper elevation={0} sx={{ p: { xs: 2, md: 5 }, borderRadius: '32px', minHeight: '80vh', bgcolor: 'white', boxShadow: '0 10px 40px rgba(0,0,0,0.03)', border: '1px solid rgba(226,232,240,0.6)' }}>
               <ActiveContent />
             </Paper>
             
-            <Stack direction="row" justifyContent="center" spacing={4} sx={{ mt: 5, opacity: 0.5 }}>
+            <Stack direction="row" justifyContent="center" spacing={4} sx={{ mt: 5, opacity: 0.6 }}>
               <Stack direction="row" spacing={1} alignItems="center">
-                <SecurityOutlined sx={{ fontSize: 16 }} />
-                <Typography sx={{ fontSize: '0.65rem', fontWeight: 700 }}>SSL ENCRYPTED</Typography>
+                <SecurityOutlined sx={{ fontSize: 16, color: '#64748B' }} />
+                <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748B', letterSpacing: '0.5px' }}>SSL ENCRYPTED</Typography>
               </Stack>
               <Stack direction="row" spacing={1} alignItems="center">
-                <StorageOutlined sx={{ fontSize: 16 }} />
-                <Typography sx={{ fontSize: '0.65rem', fontWeight: 700 }}>DATABASE: {syncStatus}</Typography>
+                <StorageOutlined sx={{ fontSize: 16, color: '#64748B' }} />
+                <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748B', letterSpacing: '0.5px' }}>DATABASE: {syncStatus.toUpperCase()}</Typography>
               </Stack>
               <Stack direction="row" spacing={1} alignItems="center">
-                <SpeedOutlined sx={{ fontSize: 16 }} />
-                <Typography sx={{ fontSize: '0.65rem', fontWeight: 700 }}>LATENCY: 24ms</Typography>
+                <SpeedOutlined sx={{ fontSize: 16, color: '#64748B' }} />
+                <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748B', letterSpacing: '0.5px' }}>LATENCY: 24ms</Typography>
               </Stack>
             </Stack>
           </Box>
@@ -333,38 +371,34 @@ const Dashboard: React.FC = () => {
       </Box>
 
       {/* OVERLAYS */}
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleCloseProfile} PaperProps={{ sx: { mt: 1, width: 220, borderRadius: '18px', p: 1, boxShadow: '0 10px 40px rgba(0,0,0,0.1)' } }}>
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleCloseProfile} PaperProps={{ sx: { mt: 1.5, width: 220, borderRadius: '16px', p: 1, boxShadow: '0 10px 40px rgba(0,0,0,0.08)', border: '1px solid #E2E8F0' } }} transformOrigin={{ horizontal: 'right', vertical: 'top' }} anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}>
         <Box sx={{ px: 2, py: 1.5 }}>
-          <Typography sx={{ fontWeight: 800, fontSize: '0.75rem', color: '#94A3B8' }}>ACCOUNT SETTINGS</Typography>
+          <Typography sx={{ fontWeight: 800, fontSize: '0.75rem', color: '#94A3B8', letterSpacing: '0.5px' }}>ACCOUNT SETTINGS</Typography>
         </Box>
         <MenuItem onClick={handleCloseProfile} sx={{ borderRadius: '10px', py: 1.2, mb: 0.5 }}>
-          <ListItemIcon><AdminPanelSettingsOutlined fontSize="small" /></ListItemIcon>
+          <ListItemIcon><AdminPanelSettingsOutlined fontSize="small" sx={{ color: PRIMARY_TEAL }} /></ListItemIcon>
           <ListItemText primary="Admin Profile" primaryTypographyProps={{ fontWeight: 600, fontSize: '0.85rem' }} />
         </MenuItem>
-        <MenuItem onClick={handleCloseProfile} sx={{ borderRadius: '10px', py: 1.2 }}>
-          <ListItemIcon><TranslateOutlined fontSize="small" /></ListItemIcon>
-          <ListItemText primary="Language" primaryTypographyProps={{ fontWeight: 600, fontSize: '0.85rem' }} />
-        </MenuItem>
-        <Divider sx={{ my: 1 }} />
-        <MenuItem onClick={() => setLogoutDialogOpen(true)} sx={{ borderRadius: '10px', color: 'error.main' }}>
-          <ListItemIcon><LogoutOutlined fontSize="small" color="error" /></ListItemIcon>
+        <Divider sx={{ my: 1, borderColor: '#F1F5F9' }} />
+        <MenuItem onClick={() => { handleCloseProfile(); setLogoutDialogOpen(true); }} sx={{ borderRadius: '10px', color: '#E11D48', '&:hover': { bgcolor: 'rgba(225,29,72,0.05)' } }}>
+          <ListItemIcon><LogoutOutlined fontSize="small" sx={{ color: '#E11D48' }} /></ListItemIcon>
           <ListItemText primary="Sign Out" primaryTypographyProps={{ fontWeight: 700, fontSize: '0.85rem' }} />
         </MenuItem>
       </Menu>
 
-      <Dialog open={logoutDialogOpen} onClose={() => setLogoutDialogOpen(false)} PaperProps={{ sx: { borderRadius: "28px", p: 2, maxWidth: 400 } }}>
+      <Dialog open={logoutDialogOpen} onClose={() => setLogoutDialogOpen(false)} PaperProps={{ sx: { borderRadius: "28px", p: 2, maxWidth: 400, boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' } }}>
         <DialogTitle sx={{ fontFamily: PRIMARY_FONT, fontWeight: 900, color: PRIMARY_TEAL, textAlign: "center", fontSize: "1.5rem" }}>Security Protocol</DialogTitle>
         <DialogContent sx={{ textAlign: "center" }}>
-          <Typography sx={{ color: "#64748B", fontWeight: 500 }}>Confirming session termination. You will need to re-authenticate to access the management modules.</Typography>
+          <Typography sx={{ color: "#64748B", fontWeight: 500, lineHeight: 1.6 }}>Confirming session termination. You will need to re-authenticate to access the management modules.</Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3, justifyContent: "center", gap: 2 }}>
-          <Button fullWidth onClick={() => setLogoutDialogOpen(false)} sx={{ color: "#94A3B8", fontWeight: 800, textTransform: "none", py: 1.5, borderRadius: "12px", bgcolor: "#F1F5F9" }}>Keep Session</Button>
-          <Button fullWidth onClick={handleLogout} variant="contained" sx={{ bgcolor: "#F43F5E", fontWeight: 800, textTransform: "none", py: 1.5, borderRadius: "12px", "&:hover": { bgcolor: "#E11D48" } }}>Logout</Button>
+          <Button fullWidth onClick={() => setLogoutDialogOpen(false)} sx={{ color: "#64748B", fontWeight: 700, textTransform: "none", py: 1.5, borderRadius: "14px", bgcolor: "#F1F5F9", '&:hover': { bgcolor: '#E2E8F0' } }}>Keep Session</Button>
+          <Button fullWidth onClick={handleLogout} variant="contained" sx={{ bgcolor: "#F43F5E", fontWeight: 700, textTransform: "none", py: 1.5, borderRadius: "14px", boxShadow: "0 8px 16px rgba(244, 63, 94, 0.25)", "&:hover": { bgcolor: "#E11D48", boxShadow: "0 10px 20px rgba(225, 29, 72, 0.3)" } }}>Logout</Button>
         </DialogActions>
       </Dialog>
 
       <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={() => setSnackbarOpen(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-        <Alert severity="info" variant="filled" sx={{ borderRadius: '12px', fontWeight: 700, fontFamily: PRIMARY_FONT }}>Module: {activeTab} Loaded Successfully</Alert>
+        <Alert severity="success" variant="filled" sx={{ borderRadius: '12px', fontWeight: 600, fontFamily: PRIMARY_FONT, bgcolor: PRIMARY_TEAL, color: 'white' }}>Module: {activeTab} Loaded</Alert>
       </Snackbar>
     </Box>
   );

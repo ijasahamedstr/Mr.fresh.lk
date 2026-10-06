@@ -39,7 +39,6 @@ const NewProductsCreate = NewProductsCreateImport as ComponentType<{
   onBack: () => void;
 }>;
 
-// Cleanly importing EditCategory (now that it has the correct props)
 import EditCategory from "./EditCategories";
 
 // --- CONFIGURATION & CONSTANTS ---
@@ -126,19 +125,20 @@ function TreeNode({
   );
 
   return (
-    <Box ml={level === 0 ? 0 : 2} mt={1}>
-      <Stack direction="row" alignItems="center" spacing={1.5}>
+    <Box ml={level === 0 ? 0 : 3} mt={1.5}>
+      <Stack direction="row" alignItems="center" spacing={2}>
         <Box
           sx={{
-            width: 28,
-            height: 28,
-            borderRadius: "6px",
+            width: 40, // Scaled down to match smaller font
+            height: 40,
+            borderRadius: "8px",
             bgcolor: level === 0 ? "#E6F4F1" : "#F1F5F9",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             color: PRIMARY_TEAL,
             flexShrink: 0,
+            boxShadow: level === 0 ? "0 2px 6px rgba(0,70,82,0.08)" : "none",
           }}
         >
           {isUrlIcon ? (
@@ -146,28 +146,31 @@ function TreeNode({
               src={node.icon}
               alt={`${node.title} icon`}
               style={{
-                width: 16,
-                height: 16,
-                borderRadius: "50%",
-                objectFit: "cover",
+                width: 26, // Scaled down proportionately
+                height: 26,
+                borderRadius: "4px",
+                objectFit: "contain",
               }}
             />
           ) : node.icon ? (
-            <Typography sx={{ fontSize: "0.9rem" }}>
+            <Typography sx={{ fontSize: "1.4rem" }}>
               {node.icon}
             </Typography>
           ) : node.children && node.children.length > 0 ? (
-            <FolderOutlined sx={{ fontSize: "1rem" }} />
+            <FolderOutlined sx={{ fontSize: "1.5rem" }} /> 
           ) : (
-            <CategoryOutlined sx={{ fontSize: "1rem" }} />
+            <CategoryOutlined sx={{ fontSize: "1.5rem" }} /> 
           )}
         </Box>
 
         <Typography
           sx={{
             fontWeight: level === 0 ? 800 : 600,
-            color: level === 0 ? PRIMARY_TEAL : "#475569",
-            fontSize: "0.85rem",
+            color: level === 0 ? PRIMARY_TEAL : "#334155",
+            fontSize: level === 0 ? "0.9rem" : "0.8rem", // Further decreased font sizes
+            letterSpacing: level === 0 ? "0.3px" : "0px",
+            textTransform: level === 0 ? "uppercase" : "capitalize",
+            lineHeight: 1.3,
           }}
         >
           {node.title}
@@ -177,10 +180,10 @@ function TreeNode({
       {Array.isArray(node.children) && node.children.length > 0 && (
         <Box
           sx={{
-            borderLeft: "1px dashed #CBD5E1",
-            ml: 1.5,
-            pl: 1,
-            mt: 0.5,
+            borderLeft: "2px dashed #CBD5E1",
+            ml: 2.3, // Adjusted alignment for smaller box
+            pl: 2.2, 
+            mt: 1.2,
           }}
         >
           {node.children.map((child) => (
@@ -335,7 +338,7 @@ export default function AllCategories() {
           width: "100%",
           minHeight: "100vh",
           bgcolor: "#F4F7FA",
-          p: { xs: 1.5, md: 3 },
+          p: { xs: 2, md: 4 },
           "@keyframes pulse": {
             "0%, 100%": { opacity: 1 },
             "50%": { opacity: 0.35 },
@@ -347,20 +350,20 @@ export default function AllCategories() {
           direction={{ xs: "column", md: "row" }}
           justifyContent="space-between"
           alignItems={{ xs: "flex-start", md: "flex-end" }}
-          mb={4}
+          mb={5}
           spacing={2}
         >
           <Box>
             <Breadcrumbs
-              separator={<NavigateNext sx={{ fontSize: "0.8rem" }} />}
-              sx={{ mb: 0.5 }}
+              separator={<NavigateNext sx={{ fontSize: "1rem" }} />}
+              sx={{ mb: 1 }}
             >
               <MuiLink
                 component={Link}
                 to="/"
                 underline="hover"
                 color="inherit"
-                sx={{ fontSize: "0.65rem", fontWeight: 700 }}
+                sx={{ fontSize: "0.8rem", fontWeight: 700 }}
               >
                 DASHBOARD
               </MuiLink>
@@ -368,7 +371,7 @@ export default function AllCategories() {
               <Typography
                 color="text.primary"
                 sx={{
-                  fontSize: "0.65rem",
+                  fontSize: "0.8rem",
                   fontWeight: 800,
                   color: PRIMARY_TEAL,
                 }}
@@ -383,17 +386,17 @@ export default function AllCategories() {
                 fontWeight: 800,
                 color: PRIMARY_TEAL,
                 letterSpacing: "-0.5px",
-                fontSize: "1.4rem",
+                fontSize: "1.8rem",
               }}
             >
               Category Trees
             </Typography>
 
-            <Stack direction="row" spacing={1} alignItems="center" mt={0.5}>
+            <Stack direction="row" spacing={1.5} alignItems="center" mt={1}>
               <Box
                 sx={{
-                  width: 8,
-                  height: 8,
+                  width: 10,
+                  height: 10,
                   borderRadius: "50%",
                   bgcolor:
                     syncStatus === "idle"
@@ -410,7 +413,7 @@ export default function AllCategories() {
 
               <Typography
                 sx={{
-                  fontSize: "0.65rem",
+                  fontSize: "0.75rem",
                   fontWeight: 700,
                   color: "#64748B",
                   letterSpacing: 0.5,
@@ -428,16 +431,16 @@ export default function AllCategories() {
           <Stack direction="row" spacing={1.5} alignItems="center">
             <Button
               type="button"
-              size="medium"
+              size="large"
               variant="contained"
-              startIcon={<AddBoxOutlined fontSize="small" />}
+              startIcon={<AddBoxOutlined />}
               onClick={() => setShowAddForm(true)}
               sx={{
                 bgcolor: PRIMARY_TEAL,
                 borderRadius: "8px",
                 px: 3,
-                py: 1,
-                fontSize: "0.8rem",
+                py: 1.2,
+                fontSize: "0.95rem",
                 fontWeight: 700,
                 boxShadow: "0 4px 12px rgba(0,70,82,0.15)",
                 "&:hover": {
@@ -451,7 +454,7 @@ export default function AllCategories() {
         </Stack>
 
         {/* PROGRESS BAR */}
-        <Box sx={{ position: "relative", width: "100%", mb: 2 }}>
+        <Box sx={{ position: "relative", width: "100%", mb: 3 }}>
           {syncStatus === "syncing" && (
             <LinearProgress
               sx={{
@@ -459,7 +462,7 @@ export default function AllCategories() {
                 top: -10,
                 left: 0,
                 right: 0,
-                height: 3,
+                height: 4,
                 borderRadius: "4px",
                 bgcolor: "transparent",
                 "& .MuiLinearProgress-bar": {
@@ -476,158 +479,199 @@ export default function AllCategories() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
         >
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
             {sections.length === 0 && syncStatus !== "syncing" ? (
               <Box sx={{ width: "100%" }}>
                 <Paper
                   elevation={0}
                   sx={{
-                    p: 6,
+                    p: 8,
                     textAlign: "center",
-                    borderRadius: "12px",
+                    borderRadius: "16px",
                     border: "1px solid #E2E8F0",
                     bgcolor: "#FFFFFF",
                   }}
                 >
                   <FolderOutlined
-                    sx={{ fontSize: 50, color: "#CBD5E1", mb: 1 }}
+                    sx={{ fontSize: 60, color: "#CBD5E1", mb: 2 }}
                   />
-                  <Typography sx={{ color: "#94A3B8", fontWeight: 600 }}>
+                  <Typography sx={{ color: "#94A3B8", fontWeight: 600, fontSize: "1.1rem" }}>
                     No category trees found in the database.
                   </Typography>
                 </Paper>
               </Box>
             ) : (
-              sections.map((section, index) => (
-                <Box
-                  key={section._id}
-                  sx={{
-                    width: {
-                      xs: "100%",
-                      sm: "calc(50% - 12px)",
-                      md: "calc(33.333% - 16px)",
-                    },
-                  }}
-                >
-                  <Paper
-                    elevation={0}
+              sections.map((section, index) => {
+                const mainCategoryName =
+                  section.categories?.[0]?.title || `Unnamed Tree ${index + 1}`;
+
+                return (
+                  <Box
+                    key={section._id}
                     sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      borderRadius: "12px",
-                      border: "1px solid #E2E8F0",
-                      overflow: "hidden",
-                      height: "100%",
-                      transition: "transform 0.2s, box-shadow 0.2s",
-                      "&:hover": {
-                        boxShadow: "0 10px 25px -5px rgba(0,0,0,0.05)",
-                        transform: "translateY(-2px)",
+                      width: {
+                        xs: "100%",
+                        sm: "calc(50% - 16px)", // 2 items per row
+                        md: "calc(33.333% - 21.33px)", // 3 items per row on medium desktop
+                        lg: "calc(33.333% - 21.33px)", // 3 items per row on large desktop
                       },
                     }}
                   >
-                    {/* Card Header */}
-                    <Box
+                    <Paper
+                      elevation={0}
                       sx={{
-                        px: 2,
-                        py: 1.5,
-                        bgcolor: "#F8FAFC",
-                        borderBottom: "1px solid #E2E8F0",
                         display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
+                        flexDirection: "column",
+                        borderRadius: "16px",
+                        border: "1px solid rgba(226, 232, 240, 0.6)",
+                        bgcolor: "#FFFFFF",
+                        overflow: "hidden",
+                        height: "100%",
+                        position: "relative",
+                        boxShadow: "0 10px 40px -10px rgba(0,70,82,0.08)",
+                        transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                        "&:hover": {
+                          boxShadow: "0 20px 40px -10px rgba(0,70,82,0.15)",
+                          transform: "translateY(-6px)",
+                          borderColor: "rgba(0,70,82,0.15)",
+                        },
                       }}
                     >
-                      <Typography
+                      {/* Premium Top Gradient Line */}
+                      <Box
                         sx={{
-                          fontWeight: 800,
-                          fontSize: "0.8rem",
-                          color: "#64748B",
-                          letterSpacing: 0.5,
+                          height: "5px",
+                          width: "100%",
+                          background: `linear-gradient(90deg, ${PRIMARY_TEAL} 0%, ${ACCENT_AMBER} 100%)`,
+                        }}
+                      />
+
+                      {/* Card Header */}
+                      <Box
+                        sx={{
+                          px: 3,
+                          py: 2.5,
+                          bgcolor: "#FFFFFF",
+                          borderBottom: "1px solid #F1F5F9",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
                         }}
                       >
-                        TREE STRUCTURE #{index + 1}
-                      </Typography>
-
-                      <Stack direction="row" spacing={0.5}>
-                        <Tooltip title="Edit Tree">
-                          <IconButton
-                            size="small"
-                            onClick={() => setCategoryToEdit(section)}
+                        <Stack direction="row" spacing={2} alignItems="center">
+                          <Box
                             sx={{
-                              color: ACCENT_AMBER,
-                              bgcolor: "#FFFBEB",
-                              "&:hover": {
-                                bgcolor: "#FEF3C7",
-                              },
+                              width: 36, // Scaled down icon box
+                              height: 36,
+                              borderRadius: "10px",
+                              bgcolor: "#F8FAFC",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: PRIMARY_TEAL,
+                              border: "1px solid #E2E8F0",
                             }}
                           >
-                            <EditOutlined fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-
-                        <Tooltip title="Delete Tree">
-                          <IconButton
-                            size="small"
-                            onClick={() =>
-                              setDeleteDialog({
-                                open: true,
-                                idToDelete: section._id,
-                              })
-                            }
+                            <CategoryOutlined sx={{ fontSize: "1.3rem" }} />
+                          </Box>
+                          <Typography
                             sx={{
-                              color: "#EF4444",
-                              bgcolor: "#FEF2F2",
-                              "&:hover": {
-                                bgcolor: "#FEE2E2",
-                              },
+                              fontWeight: 800,
+                              fontSize: "1rem", // Scaled down card header font size
+                              color: "#1E293B",
+                              letterSpacing: "-0.3px",
+                              display: "-webkit-box",
+                              WebkitLineClamp: 1,
+                              WebkitBoxOrient: "vertical",
+                              overflow: "hidden",
+                              maxWidth: "200px",
                             }}
                           >
-                            <DeleteOutline fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </Stack>
-                    </Box>
+                            {mainCategoryName}
+                          </Typography>
+                        </Stack>
 
-                    {/* Card Body - Recursive Tree */}
-                    <Box
-                      sx={{
-                        p: 2,
-                        flex: 1,
-                        overflowY: "auto",
-                        maxHeight: "350px",
-                        "&::-webkit-scrollbar": {
-                          width: "6px",
-                        },
-                        "&::-webkit-scrollbar-thumb": {
-                          backgroundColor: "#CBD5E1",
-                          borderRadius: "10px",
-                        },
-                      }}
-                    >
-                      {section.categories.length > 0 ? (
-                        section.categories.map((node) => (
-                          <TreeNode
-                            key={`${section._id}-${node.id}`}
-                            node={node}
-                          />
-                        ))
-                      ) : (
-                        <Typography
-                          sx={{
-                            fontSize: "0.8rem",
-                            color: "#94A3B8",
-                            fontStyle: "italic",
-                            textAlign: "center",
-                            mt: 2,
-                          }}
-                        >
-                          Empty Tree
-                        </Typography>
-                      )}
-                    </Box>
-                  </Paper>
-                </Box>
-              ))
+                        <Stack direction="row" spacing={0.5}>
+                          <Tooltip title="Edit Tree">
+                            <IconButton
+                              size="small"
+                              onClick={() => setCategoryToEdit(section)}
+                              sx={{
+                                color: ACCENT_AMBER,
+                                bgcolor: "#FFFBEB",
+                                "&:hover": {
+                                  bgcolor: "#FEF3C7",
+                                },
+                              }}
+                            >
+                              <EditOutlined fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+
+                          <Tooltip title="Delete Tree">
+                            <IconButton
+                              size="small"
+                              onClick={() =>
+                                setDeleteDialog({
+                                  open: true,
+                                  idToDelete: section._id,
+                                })
+                              }
+                              sx={{
+                                color: "#EF4444",
+                                bgcolor: "#FEF2F2",
+                                "&:hover": {
+                                  bgcolor: "#FEE2E2",
+                                },
+                              }}
+                            >
+                              <DeleteOutline fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Stack>
+                      </Box>
+
+                      {/* Card Body - Recursive Tree */}
+                      <Box
+                        sx={{
+                          p: 3,
+                          flex: 1,
+                          overflowY: "auto",
+                          maxHeight: "450px",
+                          "&::-webkit-scrollbar": {
+                            width: "8px",
+                          },
+                          "&::-webkit-scrollbar-thumb": {
+                            backgroundColor: "#CBD5E1",
+                            borderRadius: "10px",
+                          },
+                        }}
+                      >
+                        {section.categories.length > 0 ? (
+                          section.categories.map((node) => (
+                            <TreeNode
+                              key={`${section._id}-${node.id}`}
+                              node={node}
+                            />
+                          ))
+                        ) : (
+                          <Typography
+                            sx={{
+                              fontSize: "0.85rem",
+                              color: "#94A3B8",
+                              fontStyle: "italic",
+                              textAlign: "center",
+                              mt: 4,
+                            }}
+                          >
+                            Empty Category Tree
+                          </Typography>
+                        )}
+                      </Box>
+                    </Paper>
+                  </Box>
+                );
+              })
             )}
           </Box>
         </motion.div>
@@ -641,27 +685,27 @@ export default function AllCategories() {
           PaperProps={{
             sx: {
               borderRadius: "16px",
-              p: 1,
-              maxWidth: "380px",
+              p: 2,
+              maxWidth: "420px",
             },
           }}
         >
           <Box textAlign="center" p={3}>
             <Box
               sx={{
-                width: 70,
-                height: 70,
+                width: 80,
+                height: 80,
                 borderRadius: "50%",
                 bgcolor: "#FFF1F2",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 mx: "auto",
-                mb: 2.5,
+                mb: 3,
               }}
             >
               <WarningAmberRounded
-                sx={{ color: "#EF4444", fontSize: 36 }}
+                sx={{ color: "#EF4444", fontSize: 42 }}
               />
             </Box>
 
@@ -669,8 +713,8 @@ export default function AllCategories() {
               sx={{
                 fontWeight: 800,
                 color: "#1E293B",
-                fontSize: "1.1rem",
-                mb: 1,
+                fontSize: "1.3rem",
+                mb: 1.5,
               }}
             >
               Confirm Deletion
@@ -681,8 +725,8 @@ export default function AllCategories() {
                 color: "#64748B",
                 mb: 4,
                 fontWeight: 500,
-                fontSize: "0.85rem",
-                lineHeight: 1.5,
+                fontSize: "0.95rem",
+                lineHeight: 1.6,
               }}
             >
               You are about to permanently delete this category tree and all
@@ -701,7 +745,8 @@ export default function AllCategories() {
                   fontWeight: 700,
                   color: "#64748B",
                   borderColor: "#CBD5E1",
-                  fontSize: "0.8rem",
+                  fontSize: "0.9rem",
+                  py: 1.2,
                 }}
               >
                 Cancel
@@ -715,7 +760,8 @@ export default function AllCategories() {
                 sx={{
                   bgcolor: "#EF4444",
                   fontWeight: 700,
-                  fontSize: "0.8rem",
+                  fontSize: "0.9rem",
+                  py: 1.2,
                   boxShadow: "0 4px 12px rgba(239,68,68,0.2)",
                   "&:hover": {
                     bgcolor: "#DC2626",
@@ -752,8 +798,10 @@ export default function AllCategories() {
             sx={{
               borderRadius: "8px",
               fontWeight: 700,
-              fontSize: "0.85rem",
+              fontSize: "0.95rem",
               boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
+              py: 1,
+              px: 2,
             }}
           >
             {snackbar.message}
