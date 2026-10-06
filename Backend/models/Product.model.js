@@ -74,6 +74,7 @@ const ProductSchema = new mongoose.Schema(
   {
     // Basic Info & Identification
     name: { type: String, required: true, trim: true, index: true },
+    slug: { type: String, trim: true, default: "", index: true }, // New SEO URL Slug
     category: { type: String, required: true, index: true },
     mainCategory: { type: String, default: "", index: true },
     price: { type: Number, required: true, set: cleanNum },
@@ -104,6 +105,10 @@ const ProductSchema = new mongoose.Schema(
     itemForm: { type: String, default: "" },
     packagingType: { type: String, default: "" },
     materialTypeFree: { type: String, default: "" },
+
+    // SEO Meta Data (New)
+    metaTitle: { type: String, default: "" },
+    metaDescription: { type: String, default: "" },
 
     // Availability & Delivery Fulfillment
     availability: {
