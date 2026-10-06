@@ -19,7 +19,6 @@ import {
   SettingsOutlined,
   SellOutlined,
   PublicOutlined,
-  ListAltOutlined,
   TuneOutlined,
   LocalShippingOutlined,
   AttachMoneyOutlined,
